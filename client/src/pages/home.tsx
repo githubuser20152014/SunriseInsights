@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { DailyMessage } from "@/components/daily-message";
 import { VoiceRecording } from "@/components/voice-recording";
 import { DailyTasks } from "@/components/daily-tasks";
-import { MoodTrackerEnhanced } from "@/components/mood-tracker-enhanced";
+import { MoodSelector } from "@/components/mood-selector";
+import { MoodHistory } from "@/components/mood-history";
 import { DailyNotes } from "@/components/daily-notes";
 import { DailyReflection } from "@/components/daily-reflection";
 import { ProgressStats } from "@/components/progress-stats";
@@ -87,25 +88,27 @@ export default function Home() {
           <DailyMessage />
         </div>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-          {/* Column 1 - Tasks & Voice */}
-          <div className="space-y-6">
-            <DailyTasks />
-            <VoiceRecording />
-          </div>
+        {/* Brain Dump Section */}
+        <div className="mb-8">
+          <VoiceRecording />
+        </div>
 
-          {/* Column 2 - Mood & Notes */}
-          <div className="space-y-6">
-            <MoodTrackerEnhanced />
-            <DailyNotes />
-          </div>
+        {/* Tasks and Notes Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <DailyTasks />
+          <DailyNotes />
+        </div>
 
-          {/* Column 3 - Stats & Reflection */}
-          <div className="space-y-6 md:col-span-2 xl:col-span-1">
-            <ProgressStats />
-            <DailyReflection />
-          </div>
+        {/* Mood Tracking Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <MoodSelector />
+          <MoodHistory />
+        </div>
+
+        {/* Stats and Reflection Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <ProgressStats />
+          <DailyReflection />
         </div>
 
         {/* Bottom padding for elegant spacing */}
