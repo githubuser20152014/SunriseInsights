@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
-import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema } from "@shared/schema";
+import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -230,6 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalRecordings: 0,
           totalCompletedTasks: 0,
           totalReflections: 0,
+          totalMoods: 0,
           lastActiveDate: new Date().toISOString().split('T')[0],
         });
       }

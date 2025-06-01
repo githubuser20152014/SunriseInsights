@@ -3,6 +3,7 @@ import {
   voiceRecordings, 
   dailyTasks, 
   dailyReflections,
+  moods,
   userStats,
   type User, 
   type InsertUser,
@@ -12,6 +13,8 @@ import {
   type InsertDailyTask,
   type DailyReflection,
   type InsertDailyReflection,
+  type Mood,
+  type InsertMood,
   type UserStats,
   type InsertUserStats
 } from "@shared/schema";
@@ -33,6 +36,9 @@ export interface IStorage {
   
   createDailyReflection(reflection: InsertDailyReflection & { userId: number }): Promise<DailyReflection>;
   getDailyReflections(userId: number, limit?: number): Promise<DailyReflection[]>;
+  
+  createMood(mood: InsertMood & { userId: number }): Promise<Mood>;
+  getMoods(userId: number, limit?: number): Promise<Mood[]>;
   
   getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(userId: number, stats: Partial<UserStats>): Promise<UserStats>;
@@ -229,6 +235,7 @@ export class DatabaseStorage implements IStorage {
       totalRecordings: 0,
       totalCompletedTasks: 0,
       totalReflections: 0,
+      totalMoods: 0,
       lastActiveDate: null,
     });
     
@@ -353,6 +360,37 @@ export class DatabaseStorage implements IStorage {
     return stats || undefined;
   }
 
+  async createMood(mood: InsertMood & { userId: number }): Promise<Mood> {
+    const [moodEntry] = await db
+      .insert(moods)
+      .values(mood)
+      .returning();
+    
+    // Update user stats
+    const [stats] = await db
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, mood.userId));
+    
+    if (stats) {
+      await db
+        .update(userStats)
+        .set({ totalMoods: stats.totalMoods + 1 })
+        .where(eq(userStats.userId, mood.userId));
+    }
+    
+    return moodEntry;
+  }
+
+  async getMoods(userId: number, limit = 10): Promise<Mood[]> {
+    return await db
+      .select()
+      .from(moods)
+      .where(eq(moods.userId, userId))
+      .orderBy(moods.timestamp)
+      .limit(limit);
+  }
+
   async updateUserStats(userId: number, updates: Partial<UserStats>): Promise<UserStats> {
     let [stats] = await db
       .select()
@@ -368,6 +406,7 @@ export class DatabaseStorage implements IStorage {
           totalRecordings: 0,
           totalCompletedTasks: 0,
           totalReflections: 0,
+          totalMoods: 0,
           lastActiveDate: null,
           ...updates,
         })
@@ -385,6 +424,3 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
-
-// Create a default user for demo purposes
-storage.createUser({ username: "demo", password: "demo" });
