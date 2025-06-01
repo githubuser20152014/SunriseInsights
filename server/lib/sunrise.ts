@@ -2,32 +2,51 @@
 const ATLANTA_LAT = 33.7490;
 const ATLANTA_LON = -84.3880;
 
-// Simple sunrise calculation using astronomical formulas
+// Improved sunrise calculation using astronomical formulas
 export function calculateSunrise(date: Date): Date {
   const dayOfYear = getDayOfYear(date);
-  const year = date.getFullYear();
   
-  // Calculate the equation of time and solar declination
-  const P = Math.asin(0.39795 * Math.cos(0.98563 * (dayOfYear - 173) * Math.PI / 180));
+  // Solar declination angle
+  const declination = 23.45 * Math.sin((360 * (284 + dayOfYear) / 365) * Math.PI / 180);
   
-  // Calculate sunrise time
-  const argument = -Math.sin(ATLANTA_LAT * Math.PI / 180) * Math.sin(P) / (Math.cos(ATLANTA_LAT * Math.PI / 180) * Math.cos(P));
+  // Hour angle for sunrise
+  const latRad = ATLANTA_LAT * Math.PI / 180;
+  const declRad = declination * Math.PI / 180;
   
-  if (Math.abs(argument) > 1) {
-    // Polar day or polar night
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 6, 30, 0); // Default to 6:30 AM
+  const cosHourAngle = -Math.tan(latRad) * Math.tan(declRad);
+  
+  // Check for polar day/night
+  if (cosHourAngle < -1 || cosHourAngle > 1) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 6, 30, 0);
   }
   
-  const hourAngle = Math.acos(argument);
-  const sunriseHour = 12 - hourAngle * 12 / Math.PI;
+  const hourAngle = Math.acos(cosHourAngle) * 180 / Math.PI;
   
-  // Adjust for timezone (Atlanta is UTC-5 in winter, UTC-4 in summer)
+  // Calculate sunrise time in solar time
+  const sunriseTime = 12 - hourAngle / 15;
+  
+  // Equation of time correction
+  const B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
+  const equationOfTime = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+  
+  // Longitude correction (Atlanta is at -84.39°, divide by 15 to get hours)
+  const longitudeCorrection = (ATLANTA_LON + 75) / 15; // 75° is Eastern Standard Time meridian
+  
+  // Apply corrections
+  let correctedSunrise = sunriseTime + equationOfTime / 60 + longitudeCorrection;
+  
+  // Adjust for daylight saving time
   const isDST = isDaylightSavingTime(date);
-  const timezoneOffset = isDST ? 4 : 5;
-  const localSunriseHour = sunriseHour - timezoneOffset;
+  if (isDST) {
+    correctedSunrise += 1; // Add 1 hour for DST
+  }
   
-  const hours = Math.floor(localSunriseHour);
-  const minutes = Math.floor((localSunriseHour - hours) * 60);
+  // Ensure time is within reasonable bounds
+  if (correctedSunrise < 0) correctedSunrise += 24;
+  if (correctedSunrise >= 24) correctedSunrise -= 24;
+  
+  const hours = Math.floor(correctedSunrise);
+  const minutes = Math.floor((correctedSunrise - hours) * 60);
   
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes, 0);
 }
