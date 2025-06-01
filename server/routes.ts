@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
-import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema } from "@shared/schema";
+import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -246,6 +246,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(moods);
     } catch (error) {
       res.status(500).json({ message: "Failed to get moods" });
+    }
+  });
+
+  // Save daily notes
+  app.post("/api/daily-notes", async (req, res) => {
+    try {
+      const validatedData = insertDailyNotesSchema.parse(req.body);
+      
+      // For demo purposes, using userId 1
+      const notesData = {
+        ...validatedData,
+        userId: 1,
+      };
+
+      const notes = await storage.saveDailyNotes(notesData);
+      res.json(notes);
+    } catch (error) {
+      console.error("Failed to save daily notes:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      res.status(400).json({ message: "Failed to save daily notes", error: errorMessage });
+    }
+  });
+
+  // Get daily notes
+  app.get("/api/daily-notes", async (req, res) => {
+    try {
+      // For demo purposes, using userId 1
+      const userId = 1;
+      const date = req.query.date as string || new Date().toISOString().split('T')[0];
+      
+      const notes = await storage.getDailyNotes(userId, date);
+      res.json(notes || { content: "", date });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get daily notes" });
     }
   });
 

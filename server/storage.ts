@@ -4,6 +4,7 @@ import {
   dailyTasks, 
   dailyReflections,
   moods,
+  dailyNotes,
   userStats,
   type User, 
   type InsertUser,
@@ -15,6 +16,8 @@ import {
   type InsertDailyReflection,
   type Mood,
   type InsertMood,
+  type DailyNotes,
+  type InsertDailyNotes,
   type UserStats,
   type InsertUserStats
 } from "@shared/schema";
@@ -39,6 +42,9 @@ export interface IStorage {
   
   createMood(mood: InsertMood & { userId: number }): Promise<Mood>;
   getMoods(userId: number, limit?: number): Promise<Mood[]>;
+  
+  saveDailyNotes(notes: InsertDailyNotes & { userId: number }): Promise<DailyNotes>;
+  getDailyNotes(userId: number, date: string): Promise<DailyNotes | undefined>;
   
   getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(userId: number, stats: Partial<UserStats>): Promise<UserStats>;
@@ -389,6 +395,39 @@ export class DatabaseStorage implements IStorage {
       .where(eq(moods.userId, userId))
       .orderBy(moods.timestamp)
       .limit(limit);
+  }
+
+  async saveDailyNotes(notes: InsertDailyNotes & { userId: number }): Promise<DailyNotes> {
+    // Check if notes exist for this user and date
+    const [existingNotes] = await db
+      .select()
+      .from(dailyNotes)
+      .where(eq(dailyNotes.userId, notes.userId) && eq(dailyNotes.date, notes.date));
+
+    if (existingNotes) {
+      // Update existing notes
+      const [updatedNotes] = await db
+        .update(dailyNotes)
+        .set({ content: notes.content, updatedAt: new Date() })
+        .where(eq(dailyNotes.id, existingNotes.id))
+        .returning();
+      return updatedNotes;
+    } else {
+      // Create new notes
+      const [newNotes] = await db
+        .insert(dailyNotes)
+        .values(notes)
+        .returning();
+      return newNotes;
+    }
+  }
+
+  async getDailyNotes(userId: number, date: string): Promise<DailyNotes | undefined> {
+    const [notes] = await db
+      .select()
+      .from(dailyNotes)
+      .where(eq(dailyNotes.userId, userId) && eq(dailyNotes.date, date));
+    return notes || undefined;
   }
 
   async updateUserStats(userId: number, updates: Partial<UserStats>): Promise<UserStats> {
