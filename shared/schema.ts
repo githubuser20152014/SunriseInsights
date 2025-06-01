@@ -38,6 +38,7 @@ export const moods = pgTable("moods", {
   userId: integer("user_id").notNull(),
   mood: text("mood").notNull(),
   emoji: text("emoji").notNull(),
+  note: text("note"), // Optional quick note about why feeling this way
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 

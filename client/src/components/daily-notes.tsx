@@ -1,59 +1,82 @@
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+interface DailyNotesData {
+  id?: number;
+  content: string;
+  date: string;
+  updatedAt?: string;
+}
 
 export function DailyNotes() {
   const [notes, setNotes] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const today = new Date().toISOString().split('T')[0];
 
-  // Load notes from localStorage on component mount
+  // Load notes from database
+  const { data: notesData } = useQuery<DailyNotesData>({
+    queryKey: ["/api/daily-notes", today],
+    queryFn: async () => {
+      const response = await fetch(`/api/daily-notes?date=${today}`);
+      return response.json();
+    },
+  });
+
+  // Update local state when data loads
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const savedNotes = localStorage.getItem(`daily-notes-${today}`);
-    if (savedNotes) {
-      setNotes(savedNotes);
-      const savedTime = localStorage.getItem(`daily-notes-time-${today}`);
-      if (savedTime) {
-        setLastSaved(new Date(savedTime));
+    if (notesData?.content) {
+      setNotes(notesData.content);
+      if (notesData.updatedAt) {
+        setLastSaved(new Date(notesData.updatedAt));
       }
     }
-  }, []);
+  }, [notesData]);
 
-  const saveNotes = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const now = new Date();
-    
-    setIsSaving(true);
-    
-    // Simulate a brief save delay for user feedback
-    setTimeout(() => {
-      localStorage.setItem(`daily-notes-${today}`, notes);
-      localStorage.setItem(`daily-notes-time-${today}`, now.toISOString());
-      setLastSaved(now);
-      setIsSaving(false);
+  const saveNotesMutation = useMutation({
+    mutationFn: async (content: string) => {
+      const response = await apiRequest("POST", "/api/daily-notes", {
+        content,
+        date: today,
+      });
+      return response.json();
+    },
+    onSuccess: (data: DailyNotesData) => {
+      if (data.updatedAt) {
+        setLastSaved(new Date(data.updatedAt));
+      }
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-notes", today] });
       
       toast({
         title: "Notes saved",
-        description: "Your daily notes have been saved locally.",
+        description: "Your daily notes have been saved and synced across devices.",
       });
-    }, 300);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to save your notes. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveNotes = () => {
+    if (notes.trim()) {
+      saveNotesMutation.mutate(notes.trim());
+    }
   };
 
   const clearNotes = () => {
     setNotes("");
-    const today = new Date().toISOString().split('T')[0];
-    localStorage.removeItem(`daily-notes-${today}`);
-    localStorage.removeItem(`daily-notes-time-${today}`);
     setLastSaved(null);
-    
-    toast({
-      title: "Notes cleared",
-      description: "Your daily notes have been cleared.",
-    });
+    saveNotesMutation.mutate("");
   };
 
   return (
@@ -79,11 +102,11 @@ export function DailyNotes() {
           )}
           <Button
             onClick={saveNotes}
-            disabled={isSaving || !notes.trim()}
+            disabled={saveNotesMutation.isPending || !notes.trim()}
             size="sm"
             className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
           >
-            {isSaving ? (
+            {saveNotesMutation.isPending ? (
               <>
                 <i className="fas fa-spinner fa-spin mr-2"></i>
                 Saving...
