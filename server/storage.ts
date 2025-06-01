@@ -15,6 +15,8 @@ import {
   type UserStats,
   type InsertUserStats
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -203,7 +205,186 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    
+    // Create initial user stats
+    await db.insert(userStats).values({
+      userId: user.id,
+      dayStreak: 0,
+      totalRecordings: 0,
+      totalCompletedTasks: 0,
+      totalReflections: 0,
+      lastActiveDate: null,
+    });
+    
+    return user;
+  }
+
+  async createVoiceRecording(recording: InsertVoiceRecording): Promise<VoiceRecording> {
+    const [voiceRecording] = await db
+      .insert(voiceRecordings)
+      .values(recording)
+      .returning();
+    
+    // Update user stats
+    const [stats] = await db
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, recording.userId));
+    
+    if (stats) {
+      await db
+        .update(userStats)
+        .set({ totalRecordings: stats.totalRecordings + 1 })
+        .where(eq(userStats.userId, recording.userId));
+    }
+    
+    return voiceRecording;
+  }
+
+  async getVoiceRecordings(userId: number, limit = 10): Promise<VoiceRecording[]> {
+    return await db
+      .select()
+      .from(voiceRecordings)
+      .where(eq(voiceRecordings.userId, userId))
+      .orderBy(voiceRecordings.recordedAt)
+      .limit(limit);
+  }
+
+  async createDailyTask(task: InsertDailyTask): Promise<DailyTask> {
+    const [dailyTask] = await db
+      .insert(dailyTasks)
+      .values(task)
+      .returning();
+    return dailyTask;
+  }
+
+  async createDailyReflection(reflection: InsertDailyReflection & { userId: number }): Promise<DailyReflection> {
+    const [dailyReflection] = await db
+      .insert(dailyReflections)
+      .values(reflection)
+      .returning();
+    
+    // Update user stats
+    const [stats] = await db
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, reflection.userId));
+    
+    if (stats) {
+      await db
+        .update(userStats)
+        .set({ totalReflections: stats.totalReflections + 1 })
+        .where(eq(userStats.userId, reflection.userId));
+    }
+    
+    return dailyReflection;
+  }
+
+  async getDailyReflections(userId: number, limit = 10): Promise<DailyReflection[]> {
+    return await db
+      .select()
+      .from(dailyReflections)
+      .where(eq(dailyReflections.userId, userId))
+      .orderBy(dailyReflections.recordedAt)
+      .limit(limit);
+  }
+
+  async getDailyTasks(userId: number, date: string): Promise<DailyTask[]> {
+    return await db
+      .select()
+      .from(dailyTasks)
+      .where(eq(dailyTasks.userId, userId))
+      .orderBy(dailyTasks.createdAt);
+  }
+
+  async updateDailyTask(id: number, completed: boolean): Promise<DailyTask | undefined> {
+    const [task] = await db
+      .update(dailyTasks)
+      .set({ completed })
+      .where(eq(dailyTasks.id, id))
+      .returning();
+    
+    // Update user stats if task was completed
+    if (completed && task) {
+      const [stats] = await db
+        .select()
+        .from(userStats)
+        .where(eq(userStats.userId, task.userId));
+      
+      if (stats) {
+        await db
+          .update(userStats)
+          .set({ totalCompletedTasks: stats.totalCompletedTasks + 1 })
+          .where(eq(userStats.userId, task.userId));
+      }
+    }
+    
+    return task || undefined;
+  }
+
+  async deleteDailyTask(id: number): Promise<boolean> {
+    const result = await db
+      .delete(dailyTasks)
+      .where(eq(dailyTasks.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+
+  async getUserStats(userId: number): Promise<UserStats | undefined> {
+    const [stats] = await db
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, userId));
+    return stats || undefined;
+  }
+
+  async updateUserStats(userId: number, updates: Partial<UserStats>): Promise<UserStats> {
+    let [stats] = await db
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, userId));
+    
+    if (!stats) {
+      [stats] = await db
+        .insert(userStats)
+        .values({
+          userId,
+          dayStreak: 0,
+          totalRecordings: 0,
+          totalCompletedTasks: 0,
+          totalReflections: 0,
+          lastActiveDate: null,
+          ...updates,
+        })
+        .returning();
+    } else {
+      [stats] = await db
+        .update(userStats)
+        .set(updates)
+        .where(eq(userStats.userId, userId))
+        .returning();
+    }
+    
+    return stats;
+  }
+}
+
+export const storage = new DatabaseStorage();
 
 // Create a default user for demo purposes
 storage.createUser({ username: "demo", password: "demo" });
