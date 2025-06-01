@@ -192,18 +192,18 @@ export function DailyTasks() {
         {sortedTasks.map((task, index) => (
           <div 
             key={task.id} 
-            className={`flex items-start space-x-3 p-3 bg-slate-50 rounded-xl cursor-move transition-all duration-200 ${
+            className={`flex items-start space-x-3 p-3 bg-slate-50 rounded-xl transition-all duration-200 ${
               draggedItem === task.id ? 'opacity-50 scale-95' : 'hover:bg-slate-100'
-            }`}
+            } ${!task.completed ? 'cursor-move' : ''}`}
             draggable={!task.completed}
-            onDragStart={(e) => handleDragStart(e, task.id)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, index)}
-            onDragEnd={handleDragEnd}
+            onDragStart={(e) => !task.completed && handleDragStart(e, task.id)}
+            onDragOver={!task.completed ? handleDragOver : undefined}
+            onDrop={(e) => !task.completed && handleDrop(e, index)}
+            onDragEnd={!task.completed ? handleDragEnd : undefined}
           >
             <div className="flex items-center space-x-2">
               {!task.completed && (
-                <i className="fas fa-grip-vertical text-slate-400 text-xs cursor-move"></i>
+                <i className="fas fa-grip-vertical text-slate-400 text-xs cursor-move" title="Drag to reorder"></i>
               )}
               <Button
                 variant="ghost"
