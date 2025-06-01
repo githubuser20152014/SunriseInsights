@@ -1,0 +1,141 @@
+import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+
+export function DailyNotes() {
+  const [notes, setNotes] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const { toast } = useToast();
+
+  // Load notes from localStorage on component mount
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const savedNotes = localStorage.getItem(`daily-notes-${today}`);
+    if (savedNotes) {
+      setNotes(savedNotes);
+      const savedTime = localStorage.getItem(`daily-notes-time-${today}`);
+      if (savedTime) {
+        setLastSaved(new Date(savedTime));
+      }
+    }
+  }, []);
+
+  const saveNotes = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    
+    setIsSaving(true);
+    
+    // Simulate a brief save delay for user feedback
+    setTimeout(() => {
+      localStorage.setItem(`daily-notes-${today}`, notes);
+      localStorage.setItem(`daily-notes-time-${today}`, now.toISOString());
+      setLastSaved(now);
+      setIsSaving(false);
+      
+      toast({
+        title: "Notes saved",
+        description: "Your daily notes have been saved locally.",
+      });
+    }, 300);
+  };
+
+  const clearNotes = () => {
+    setNotes("");
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.removeItem(`daily-notes-${today}`);
+    localStorage.removeItem(`daily-notes-time-${today}`);
+    setLastSaved(null);
+    
+    toast({
+      title: "Notes cleared",
+      description: "Your daily notes have been cleared.",
+    });
+  };
+
+  return (
+    <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <i className="fas fa-edit text-blue-600 text-sm"></i>
+          </div>
+          <h3 className="text-lg font-medium text-slate-800">Daily Notes</h3>
+        </div>
+        <div className="flex items-center space-x-2">
+          {notes.trim() && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearNotes}
+              className="text-xs text-slate-500 hover:text-red-600"
+            >
+              <i className="fas fa-trash mr-1"></i>
+              Clear
+            </Button>
+          )}
+          <Button
+            onClick={saveNotes}
+            disabled={isSaving || !notes.trim()}
+            size="sm"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+          >
+            {isSaving ? (
+              <>
+                <i className="fas fa-spinner fa-spin mr-2"></i>
+                Saving...
+              </>
+            ) : (
+              <>
+                <i className="fas fa-save mr-2"></i>
+                Save
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <Textarea
+          placeholder="Jot down thoughts, ideas, reminders, or anything else that comes to mind throughout your day..."
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className="min-h-[120px] border-0 bg-slate-50 focus:ring-2 focus:ring-blue-500 resize-none"
+        />
+        
+        <div className="flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center space-x-4">
+            <span>{notes.length} characters</span>
+            {notes.trim() && (
+              <span>{notes.trim().split(/\s+/).length} words</span>
+            )}
+          </div>
+          {lastSaved && (
+            <div className="flex items-center space-x-1">
+              <i className="fas fa-check-circle text-green-500"></i>
+              <span>
+                Last saved {lastSaved.toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                })}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+        <div className="flex items-start space-x-2">
+          <i className="fas fa-lightbulb text-blue-600 text-sm mt-0.5"></i>
+          <div className="text-xs text-blue-700">
+            <strong>Quick tip:</strong> Your notes are saved locally for today. Use this space for capturing ideas, tracking mood changes, or noting important moments throughout your day.
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
