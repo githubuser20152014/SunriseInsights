@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { DailyMessage } from "@/components/daily-message";
 import { VoiceRecording } from "@/components/voice-recording";
 import { DailyTasks } from "@/components/daily-tasks";
-import { MoodTracker } from "@/components/mood-tracker";
+import { MoodTrackerEnhanced } from "@/components/mood-tracker-enhanced";
 import { DailyNotes } from "@/components/daily-notes";
 import { DailyReflection } from "@/components/daily-reflection";
 import { ProgressStats } from "@/components/progress-stats";
@@ -91,7 +91,7 @@ export default function Home() {
         <DailyTasks />
 
         {/* Mood Tracker */}
-        <MoodTracker />
+        <MoodTrackerEnhanced />
 
         {/* Daily Notes */}
         <DailyNotes />

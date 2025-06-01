@@ -30,37 +30,50 @@ export function MoodTracker() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [currentMoodEntry, setCurrentMoodEntry] = useState<MoodEntry | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [note, setNote] = useState("");
+  const [showNoteInput, setShowNoteInput] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Load today's mood from localStorage
+  // Load today's moods from database
+  const { data: todaysMoods } = useQuery<MoodEntry[]>({
+    queryKey: ["/api/moods"],
+    queryFn: async () => {
+      const response = await fetch("/api/moods?limit=50");
+      return response.json();
+    },
+  });
+
+  // Get the most recent mood for display
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const savedMood = localStorage.getItem(`daily-mood-${today}`);
-    if (savedMood) {
-      const moodData = JSON.parse(savedMood);
-      setCurrentMoodEntry(moodData);
-      setSelectedMood(moodData.mood);
+    if (todaysMoods && todaysMoods.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const todayEntries = todaysMoods.filter(mood => 
+        mood.timestamp.startsWith(today)
+      );
+      if (todayEntries.length > 0) {
+        const latest = todayEntries[todayEntries.length - 1];
+        setCurrentMoodEntry(latest);
+        setSelectedMood(latest.mood);
+      }
     }
-  }, []);
+  }, [todaysMoods]);
 
   const createMoodMutation = useMutation({
-    mutationFn: async (moodData: { mood: string; emoji: string }) => {
+    mutationFn: async (moodData: { mood: string; emoji: string; note?: string }) => {
       const response = await apiRequest("POST", "/api/moods", moodData);
       return response.json();
     },
     onSuccess: (data: MoodEntry) => {
       setCurrentMoodEntry(data);
-      
-      // Save to localStorage for quick access
-      const today = new Date().toISOString().split('T')[0];
-      localStorage.setItem(`daily-mood-${today}`, JSON.stringify(data));
+      setNote("");
+      setShowNoteInput(false);
       
       queryClient.invalidateQueries({ queryKey: ["/api/moods"] });
       
       toast({
         title: "Mood captured",
-        description: `Your ${data.mood} mood has been recorded for today.`,
+        description: `Your ${data.mood} mood has been recorded. ${data.note ? "Your note was saved too." : ""}`,
       });
     },
     onError: () => {
