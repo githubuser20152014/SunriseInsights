@@ -67,9 +67,15 @@ export default function Home() {
               <span className="text-stone-700 font-medium">Alpharetta, GA</span>
             </div>
             <div className="text-stone-600 text-xs">
-              <div className="flex space-x-3">
-                <span>🌅 {sunData?.sunrise?.formatted || "Loading..."}</span>
-                <span>🌆 {sunData?.sunset?.formatted || "Loading..."}</span>
+              <div className="flex space-x-4">
+                <div className="flex items-center space-x-1">
+                  <i className="fas fa-sun text-amber-500 text-xs"></i>
+                  <span>{sunData?.sunrise?.formatted || "Loading..."}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <i className="fas fa-moon text-indigo-500 text-xs"></i>
+                  <span>{sunData?.sunset?.formatted || "Loading..."}</span>
+                </div>
               </div>
             </div>
           </div>
