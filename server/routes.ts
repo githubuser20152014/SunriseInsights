@@ -215,6 +215,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create a mood entry
+  app.post("/api/moods", async (req, res) => {
+    try {
+      const validatedData = insertMoodSchema.parse(req.body);
+      
+      // For demo purposes, using userId 1
+      const moodData = {
+        ...validatedData,
+        userId: 1,
+      };
+
+      const mood = await storage.createMood(moodData);
+      res.json(mood);
+    } catch (error) {
+      console.error("Failed to create mood:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      res.status(400).json({ message: "Failed to create mood", error: errorMessage });
+    }
+  });
+
+  // Get mood entries
+  app.get("/api/moods", async (req, res) => {
+    try {
+      // For demo purposes, using userId 1
+      const userId = 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      const moods = await storage.getMoods(userId, limit);
+      res.json(moods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get moods" });
+    }
+  });
+
   // Get user stats
   app.get("/api/user-stats", async (req, res) => {
     try {
