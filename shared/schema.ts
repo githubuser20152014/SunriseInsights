@@ -60,6 +60,7 @@ export const insertDailyTaskSchema = createInsertSchema(dailyTasks).omit({
 
 export const insertDailyReflectionSchema = createInsertSchema(dailyReflections).omit({
   id: true,
+  userId: true,
   recordedAt: true,
 });
 

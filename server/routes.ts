@@ -170,6 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a daily reflection
   app.post("/api/daily-reflections", async (req, res) => {
     try {
+      console.log("Received reflection data:", req.body);
       const validatedData = insertDailyReflectionSchema.parse(req.body);
       
       // For demo purposes, using userId 1
@@ -194,7 +195,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reflection = await storage.createDailyReflection(reflectionWithSummary);
       res.json(reflection);
     } catch (error) {
-      res.status(400).json({ message: "Failed to create reflection" });
+      console.error("Failed to create reflection:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      res.status(400).json({ message: "Failed to create reflection", error: errorMessage });
     }
   });
 

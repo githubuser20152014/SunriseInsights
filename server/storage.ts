@@ -130,11 +130,12 @@ export class MemStorage implements IStorage {
     return dailyTask;
   }
 
-  async createDailyReflection(reflection: InsertDailyReflection): Promise<DailyReflection> {
+  async createDailyReflection(reflection: InsertDailyReflection & { userId: number }): Promise<DailyReflection> {
     const id = this.reflectionId++;
     const dailyReflection: DailyReflection = {
       ...reflection,
       id,
+      userId: reflection.userId,
       summary: reflection.summary || null,
       recordedAt: new Date(),
     };
