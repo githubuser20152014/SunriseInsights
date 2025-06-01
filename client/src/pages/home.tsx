@@ -67,6 +67,9 @@ export default function Home() {
         {/* Daily Tasks */}
         <DailyTasks />
 
+        {/* End of Day Reflection */}
+        <DailyReflection />
+
         {/* Progress Stats */}
         <ProgressStats />
       </main>
