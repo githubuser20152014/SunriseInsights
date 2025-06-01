@@ -56,51 +56,57 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-6 py-8 space-y-8 relative z-10">
-        {/* Location Status */}
-        <div className="glass-card rounded-3xl p-5 border-0 shadow-xl gentle-pulse">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
-                <i className="fas fa-map-marker-alt text-white text-xs"></i>
-              </div>
-              <span className="text-stone-700 font-medium">Alpharetta, GA</span>
-            </div>
-            <div className="text-stone-600 text-xs">
-              <div className="flex space-x-4">
-                <div className="flex items-center space-x-1">
-                  <i className="fas fa-sun text-amber-500 text-xs"></i>
-                  <span>{sunData?.sunrise?.formatted || "Loading..."}</span>
+      <main className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+        {/* Header Section - Full Width */}
+        <div className="mb-8 space-y-6">
+          {/* Location Status */}
+          <div className="glass-card rounded-3xl p-5 border-0 shadow-xl gentle-pulse">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
+                  <i className="fas fa-map-marker-alt text-white text-xs"></i>
                 </div>
-                <div className="flex items-center space-x-1">
-                  <i className="fas fa-moon text-indigo-500 text-xs"></i>
-                  <span>{sunData?.sunset?.formatted || "Loading..."}</span>
+                <span className="text-stone-700 font-medium">Alpharetta, GA</span>
+              </div>
+              <div className="text-stone-600 text-xs">
+                <div className="flex space-x-4">
+                  <div className="flex items-center space-x-1">
+                    <i className="fas fa-sun text-amber-500 text-xs"></i>
+                    <span>{sunData?.sunrise?.formatted || "Loading..."}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <i className="fas fa-moon text-indigo-500 text-xs"></i>
+                    <span>{sunData?.sunset?.formatted || "Loading..."}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Daily Message */}
+          <DailyMessage />
         </div>
 
-        {/* Daily Message */}
-        <DailyMessage />
+        {/* Main Dashboard Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+          {/* Column 1 - Tasks & Voice */}
+          <div className="space-y-6">
+            <DailyTasks />
+            <VoiceRecording />
+          </div>
 
-        {/* Voice Recording */}
-        <VoiceRecording />
+          {/* Column 2 - Mood & Notes */}
+          <div className="space-y-6">
+            <MoodTrackerEnhanced />
+            <DailyNotes />
+          </div>
 
-        {/* Daily Tasks */}
-        <DailyTasks />
-
-        {/* Mood Tracker */}
-        <MoodTrackerEnhanced />
-
-        {/* Daily Notes */}
-        <DailyNotes />
-
-        {/* End of Day Reflection */}
-        <DailyReflection />
-
-        {/* Progress Stats */}
-        <ProgressStats />
+          {/* Column 3 - Stats & Reflection */}
+          <div className="space-y-6 md:col-span-2 xl:col-span-1">
+            <ProgressStats />
+            <DailyReflection />
+          </div>
+        </div>
 
         {/* Bottom padding for elegant spacing */}
         <div className="h-8"></div>
