@@ -1,0 +1,63 @@
+import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+});
+
+export const voiceRecordings = pgTable("voice_recordings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  transcript: text("transcript").notNull(),
+  summary: text("summary"),
+  recordedAt: timestamp("recorded_at").defaultNow().notNull(),
+});
+
+export const dailyTasks = pgTable("daily_tasks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  text: text("text").notNull(),
+  completed: boolean("completed").default(false).notNull(),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userStats = pgTable("user_stats", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  dayStreak: integer("day_streak").default(0).notNull(),
+  totalRecordings: integer("total_recordings").default(0).notNull(),
+  totalCompletedTasks: integer("total_completed_tasks").default(0).notNull(),
+  lastActiveDate: text("last_active_date"), // YYYY-MM-DD format
+});
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+});
+
+export const insertVoiceRecordingSchema = createInsertSchema(voiceRecordings).omit({
+  id: true,
+  recordedAt: true,
+});
+
+export const insertDailyTaskSchema = createInsertSchema(dailyTasks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserStatsSchema = createInsertSchema(userStats).omit({
+  id: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type VoiceRecording = typeof voiceRecordings.$inferSelect;
+export type InsertVoiceRecording = z.infer<typeof insertVoiceRecordingSchema>;
+export type DailyTask = typeof dailyTasks.$inferSelect;
+export type InsertDailyTask = z.infer<typeof insertDailyTaskSchema>;
+export type UserStats = typeof userStats.$inferSelect;
+export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;

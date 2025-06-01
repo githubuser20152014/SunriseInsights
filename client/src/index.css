@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+  
+  /* Custom sunrise colors */
+  --sunrise-50: 44 100% 97%; /* #FFF7ED */
+  --sunrise-100: 34 100% 92%; /* #FFEDD5 */
+  --sunrise-200: 32 98% 83%; /* #FED7AA */
+  --sunrise-300: 31 97% 72%; /* #FDBA74 */
+  --sunrise-400: 27 96% 61%; /* #FB923C */
+  --sunrise-500: 24 95% 53%; /* #F97316 */
+  --sunrise-600: 20 91% 48%; /* #EA580C */
+  --sunrise-700: 17 88% 40%; /* #C2410C */
+  --sunrise-800: 15 86% 30%; /* #9A3412 */
+  --sunrise-900: 9 81% 27%; /* #7C2D12 */
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Custom sunrise color utilities */
+.bg-sunrise-50 { background-color: hsl(var(--sunrise-50)); }
+.bg-sunrise-100 { background-color: hsl(var(--sunrise-100)); }
+.bg-sunrise-200 { background-color: hsl(var(--sunrise-200)); }
+.bg-sunrise-300 { background-color: hsl(var(--sunrise-300)); }
+.bg-sunrise-400 { background-color: hsl(var(--sunrise-400)); }
+.bg-sunrise-500 { background-color: hsl(var(--sunrise-500)); }
+.bg-sunrise-600 { background-color: hsl(var(--sunrise-600)); }
+.bg-sunrise-700 { background-color: hsl(var(--sunrise-700)); }
+.bg-sunrise-800 { background-color: hsl(var(--sunrise-800)); }
+.bg-sunrise-900 { background-color: hsl(var(--sunrise-900)); }
+
+.text-sunrise-50 { color: hsl(var(--sunrise-50)); }
+.text-sunrise-100 { color: hsl(var(--sunrise-100)); }
+.text-sunrise-200 { color: hsl(var(--sunrise-200)); }
+.text-sunrise-300 { color: hsl(var(--sunrise-300)); }
+.text-sunrise-400 { color: hsl(var(--sunrise-400)); }
+.text-sunrise-500 { color: hsl(var(--sunrise-500)); }
+.text-sunrise-600 { color: hsl(var(--sunrise-600)); }
+.text-sunrise-700 { color: hsl(var(--sunrise-700)); }
+.text-sunrise-800 { color: hsl(var(--sunrise-800)); }
+.text-sunrise-900 { color: hsl(var(--sunrise-900)); }
+
+.border-sunrise-50 { border-color: hsl(var(--sunrise-50)); }
+.border-sunrise-100 { border-color: hsl(var(--sunrise-100)); }
+.border-sunrise-200 { border-color: hsl(var(--sunrise-200)); }
+.border-sunrise-300 { border-color: hsl(var(--sunrise-300)); }
+.border-sunrise-400 { border-color: hsl(var(--sunrise-400)); }
+.border-sunrise-500 { border-color: hsl(var(--sunrise-500)); }
+.border-sunrise-600 { border-color: hsl(var(--sunrise-600)); }
+.border-sunrise-700 { border-color: hsl(var(--sunrise-700)); }
+.border-sunrise-800 { border-color: hsl(var(--sunrise-800)); }
+.border-sunrise-900 { border-color: hsl(var(--sunrise-900)); }
