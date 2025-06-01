@@ -200,9 +200,13 @@ export function VoiceRecording() {
                     <div className="h-3 bg-emerald-200 rounded mb-2"></div>
                     <div className="h-3 bg-emerald-200 rounded w-3/4"></div>
                   </div>
-                ) : (
+                ) : lastSummary ? (
                   <p className="text-sm text-slate-700 leading-relaxed">
                     {lastSummary}
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-500 italic">
+                    Your thoughts have been saved. AI summary temporarily unavailable.
                   </p>
                 )}
               </div>

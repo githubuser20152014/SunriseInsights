@@ -37,11 +37,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Transcript is required" });
       }
 
-      // Generate AI summary
-      const summary = await summarizeThoughts(transcript);
-
       // For demo purposes, using userId 1 (the default demo user)
       const userId = 1;
+      let summary = null;
+
+      // Try to generate AI summary, but fallback gracefully if it fails
+      try {
+        summary = await summarizeThoughts(transcript);
+      } catch (aiError) {
+        console.warn("AI summary failed, storing without summary:", aiError.message);
+        // Continue without summary - the recording will still be saved
+      }
 
       const recordingData = {
         userId,
