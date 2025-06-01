@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ export function VoiceRecording() {
   const [lastSummary, setLastSummary] = useState<string | null>(null);
   const [typedThoughts, setTypedThoughts] = useState("");
   const [useTextInput, setUseTextInput] = useState(false);
+  const [uploadingAudio, setUploadingAudio] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
