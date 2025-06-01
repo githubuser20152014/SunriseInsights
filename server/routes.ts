@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
-import { insertVoiceRecordingSchema, insertDailyTaskSchema } from "@shared/schema";
+import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -167,6 +167,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create a daily reflection
+  app.post("/api/daily-reflections", async (req, res) => {
+    try {
+      const validatedData = insertDailyReflectionSchema.parse(req.body);
+      
+      // For demo purposes, using userId 1
+      const reflectionData = {
+        ...validatedData,
+        userId: 1,
+      };
+
+      let summary = null;
+      try {
+        summary = await summarizeThoughts(reflectionData.transcript);
+      } catch (aiError) {
+        console.error("Failed to generate AI summary:", aiError);
+        // Continue without summary
+      }
+
+      const reflectionWithSummary = {
+        ...reflectionData,
+        summary,
+      };
+
+      const reflection = await storage.createDailyReflection(reflectionWithSummary);
+      res.json(reflection);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create reflection" });
+    }
+  });
+
+  // Get daily reflections
+  app.get("/api/daily-reflections", async (req, res) => {
+    try {
+      // For demo purposes, using userId 1
+      const userId = 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      const reflections = await storage.getDailyReflections(userId, limit);
+      res.json(reflections);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get reflections" });
+    }
+  });
+
   // Get user stats
   app.get("/api/user-stats", async (req, res) => {
     try {
@@ -181,6 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           dayStreak: 1,
           totalRecordings: 0,
           totalCompletedTasks: 0,
+          totalReflections: 0,
           lastActiveDate: new Date().toISOString().split('T')[0],
         });
       }

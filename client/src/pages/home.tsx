@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { DailyMessage } from "@/components/daily-message";
 import { VoiceRecording } from "@/components/voice-recording";
 import { DailyTasks } from "@/components/daily-tasks";
+import { DailyReflection } from "@/components/daily-reflection";
 import { ProgressStats } from "@/components/progress-stats";
 
 interface SunData {

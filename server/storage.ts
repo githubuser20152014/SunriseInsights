@@ -83,6 +83,7 @@ export class MemStorage implements IStorage {
       dayStreak: 0,
       totalRecordings: 0,
       totalCompletedTasks: 0,
+      totalReflections: 0,
       lastActiveDate: null,
     };
     this.userStats.set(id, stats);
@@ -95,6 +96,7 @@ export class MemStorage implements IStorage {
     const voiceRecording: VoiceRecording = {
       ...recording,
       id,
+      summary: recording.summary || null,
       recordedAt: new Date(),
     };
     this.voiceRecordings.set(id, voiceRecording);
@@ -121,10 +123,38 @@ export class MemStorage implements IStorage {
     const dailyTask: DailyTask = {
       ...task,
       id,
+      completed: task.completed ?? false,
       createdAt: new Date(),
     };
     this.dailyTasks.set(id, dailyTask);
     return dailyTask;
+  }
+
+  async createDailyReflection(reflection: InsertDailyReflection): Promise<DailyReflection> {
+    const id = this.reflectionId++;
+    const dailyReflection: DailyReflection = {
+      ...reflection,
+      id,
+      summary: reflection.summary || null,
+      recordedAt: new Date(),
+    };
+    this.dailyReflections.set(id, dailyReflection);
+    
+    // Update user stats
+    const stats = this.userStats.get(reflection.userId);
+    if (stats) {
+      stats.totalReflections++;
+      this.userStats.set(reflection.userId, stats);
+    }
+    
+    return dailyReflection;
+  }
+
+  async getDailyReflections(userId: number, limit = 10): Promise<DailyReflection[]> {
+    return Array.from(this.dailyReflections.values())
+      .filter((reflection) => reflection.userId === userId)
+      .sort((a, b) => b.recordedAt.getTime() - a.recordedAt.getTime())
+      .slice(0, limit);
   }
 
   async getDailyTasks(userId: number, date: string): Promise<DailyTask[]> {
