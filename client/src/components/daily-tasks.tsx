@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,30 @@ interface DailyTask {
   text: string;
   completed: boolean;
   date: string;
+  createdAt: string;
 }
 
 export function DailyTasks() {
   const [newTaskText, setNewTaskText] = useState("");
+  const [sortedTasks, setSortedTasks] = useState<DailyTask[]>([]);
+  const [draggedItem, setDraggedItem] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: tasks = [], isLoading } = useQuery<DailyTask[]>({
     queryKey: ["/api/daily-tasks"],
   });
+
+  // Sort tasks: incomplete first, then completed at bottom
+  useEffect(() => {
+    const sorted = [...tasks].sort((a, b) => {
+      if (a.completed === b.completed) {
+        return a.createdAt.localeCompare(b.createdAt);
+      }
+      return a.completed ? 1 : -1;
+    });
+    setSortedTasks(sorted);
+  }, [tasks]);
 
   const createTaskMutation = useMutation({
     mutationFn: async (text: string) => {
@@ -102,6 +116,40 @@ export function DailyTasks() {
     deleteTaskMutation.mutate(id);
   };
 
+  const handleDragStart = (e: React.DragEvent, taskId: number) => {
+    setDraggedItem(taskId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (draggedItem === null) return;
+    
+    const dragIndex = sortedTasks.findIndex(task => task.id === draggedItem);
+    if (dragIndex === dropIndex) return;
+    
+    const newTasks = [...sortedTasks];
+    const draggedTask = newTasks[dragIndex];
+    
+    // Remove from old position
+    newTasks.splice(dragIndex, 1);
+    // Insert at new position
+    newTasks.splice(dropIndex, 0, draggedTask);
+    
+    setSortedTasks(newTasks);
+    setDraggedItem(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+  };
+
   if (isLoading) {
     return (
       <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
@@ -141,18 +189,33 @@ export function DailyTasks() {
 
       <div className="space-y-3">
         {/* Existing Tasks */}
-        {tasks.map((task) => (
-          <div key={task.id} className="flex items-start space-x-3 p-3 bg-slate-50 rounded-xl">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-5 h-5 p-0 border-2 border-slate-300 rounded-full flex items-center justify-center mt-0.5 hover:border-emerald-500 transition-colors"
-              onClick={() => toggleTask(task.id, task.completed)}
-            >
-              {task.completed && (
-                <i className="fas fa-check text-emerald-500 text-xs"></i>
+        {sortedTasks.map((task, index) => (
+          <div 
+            key={task.id} 
+            className={`flex items-start space-x-3 p-3 bg-slate-50 rounded-xl cursor-move transition-all duration-200 ${
+              draggedItem === task.id ? 'opacity-50 scale-95' : 'hover:bg-slate-100'
+            }`}
+            draggable={!task.completed}
+            onDragStart={(e) => handleDragStart(e, task.id)}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, index)}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="flex items-center space-x-2">
+              {!task.completed && (
+                <i className="fas fa-grip-vertical text-slate-400 text-xs cursor-move"></i>
               )}
-            </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-5 h-5 p-0 border-2 border-slate-300 rounded-full flex items-center justify-center hover:border-emerald-500 transition-colors"
+                onClick={() => toggleTask(task.id, task.completed)}
+              >
+                {task.completed && (
+                  <i className="fas fa-check text-emerald-500 text-xs"></i>
+                )}
+              </Button>
+            </div>
             <div className="flex-1">
               <p className={`text-slate-700 ${task.completed ? 'line-through text-slate-500' : ''}`}>
                 {task.text}
