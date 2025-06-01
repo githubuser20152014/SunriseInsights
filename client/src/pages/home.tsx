@@ -105,10 +105,14 @@ export default function Home() {
           <MoodHistory />
         </div>
 
-        {/* Stats and Reflection Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <ProgressStats />
+        {/* End of Day Reflection */}
+        <div className="mb-8">
           <DailyReflection />
+        </div>
+
+        {/* Progress Stats */}
+        <div className="mb-8">
+          <ProgressStats />
         </div>
 
         {/* Bottom padding for elegant spacing */}
