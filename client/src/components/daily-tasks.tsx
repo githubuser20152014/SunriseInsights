@@ -29,7 +29,7 @@ export function DailyTasks() {
   useEffect(() => {
     const sorted = [...tasks].sort((a, b) => {
       if (a.completed === b.completed) {
-        return a.createdAt.localeCompare(b.createdAt);
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
       return a.completed ? 1 : -1;
     });

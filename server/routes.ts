@@ -2,19 +2,19 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage } from "./lib/openai";
-import { getTodaysSunrise } from "./lib/sunrise";
+import { getTodaysSunTimes } from "./lib/sunrise";
 import { insertVoiceRecordingSchema, insertDailyTaskSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
-  // Get sunrise time for Atlanta, GA
+  // Get sunrise and sunset times for Alpharetta, GA
   app.get("/api/sunrise", async (req, res) => {
     try {
-      const sunrise = getTodaysSunrise();
-      res.json(sunrise);
+      const sunTimes = getTodaysSunTimes();
+      res.json(sunTimes);
     } catch (error) {
-      res.status(500).json({ message: "Failed to calculate sunrise time" });
+      res.status(500).json({ message: "Failed to calculate sun times" });
     }
   });
 

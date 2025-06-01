@@ -4,12 +4,19 @@ import { VoiceRecording } from "@/components/voice-recording";
 import { DailyTasks } from "@/components/daily-tasks";
 import { ProgressStats } from "@/components/progress-stats";
 
-interface SunriseData {
-  formatted: string;
+interface SunData {
+  sunrise: {
+    time: string;
+    formatted: string;
+  };
+  sunset: {
+    time: string;
+    formatted: string;
+  };
 }
 
 export default function Home() {
-  const { data: sunrise } = useQuery<SunriseData>({
+  const { data: sunData } = useQuery<SunData>({
     queryKey: ["/api/sunrise"],
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
@@ -45,7 +52,9 @@ export default function Home() {
           <i className="fas fa-map-marker-alt text-orange-500"></i>
           <span>Alpharetta, GA</span>
           <span>•</span>
-          <span>Sunrise {sunrise?.formatted || "Loading..."}</span>
+          <span>Sunrise {sunData?.sunrise?.formatted || "Loading..."}</span>
+          <span>•</span>
+          <span>Sunset {sunData?.sunset?.formatted || "Loading..."}</span>
         </div>
 
         {/* Daily Message */}

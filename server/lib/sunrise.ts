@@ -83,12 +83,80 @@ export function formatSunriseTime(date: Date): string {
   });
 }
 
+// Calculate sunset time using similar formula but adding 12 hours to hour angle
+export function calculateSunset(date: Date): Date {
+  const dayOfYear = getDayOfYear(date);
+  
+  // Solar declination angle
+  const declination = 23.45 * Math.sin((360 * (284 + dayOfYear) / 365) * Math.PI / 180);
+  
+  // Hour angle for sunset
+  const latRad = ATLANTA_LAT * Math.PI / 180;
+  const declRad = declination * Math.PI / 180;
+  
+  const cosHourAngle = -Math.tan(latRad) * Math.tan(declRad);
+  
+  // Check for polar day/night
+  if (cosHourAngle < -1 || cosHourAngle > 1) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 19, 30, 0);
+  }
+  
+  const hourAngle = Math.acos(cosHourAngle) * 180 / Math.PI;
+  
+  // Calculate sunset time in solar time (12 + hour angle instead of 12 - hour angle)
+  const sunsetTime = 12 + hourAngle / 15;
+  
+  // Equation of time correction
+  const B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
+  const equationOfTime = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+  
+  // Longitude correction
+  const longitudeCorrection = (ATLANTA_LON + 75) / 15;
+  
+  // Apply corrections
+  let correctedSunset = sunsetTime + equationOfTime / 60 + longitudeCorrection;
+  
+  // Fine-tune for Alpharetta
+  correctedSunset += 1.07;
+  
+  // Adjust for daylight saving time
+  const isDST = isDaylightSavingTime(date);
+  if (isDST) {
+    correctedSunset += 1;
+  }
+  
+  // Ensure time is within reasonable bounds
+  if (correctedSunset < 0) correctedSunset += 24;
+  if (correctedSunset >= 24) correctedSunset -= 24;
+  
+  const hours = Math.floor(correctedSunset);
+  const minutes = Math.floor((correctedSunset - hours) * 60);
+  
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes, 0);
+}
+
 export function getTodaysSunrise(): { time: Date; formatted: string } {
   const today = new Date();
   const sunriseTime = calculateSunrise(today);
   return {
     time: sunriseTime,
     formatted: formatSunriseTime(sunriseTime)
+  };
+}
+
+export function getTodaysSunset(): { time: Date; formatted: string } {
+  const today = new Date();
+  const sunsetTime = calculateSunset(today);
+  return {
+    time: sunsetTime,
+    formatted: formatSunriseTime(sunsetTime) // Same formatting function
+  };
+}
+
+export function getTodaysSunTimes(): { sunrise: { time: Date; formatted: string }, sunset: { time: Date; formatted: string } } {
+  return {
+    sunrise: getTodaysSunrise(),
+    sunset: getTodaysSunset()
   };
 }
 
