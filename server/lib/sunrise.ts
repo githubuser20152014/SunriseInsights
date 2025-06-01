@@ -1,6 +1,6 @@
-// Atlanta, GA coordinates
-const ATLANTA_LAT = 33.7490;
-const ATLANTA_LON = -84.3880;
+// Alpharetta, GA coordinates (more accurate for your location)
+const ATLANTA_LAT = 34.0754;
+const ATLANTA_LON = -84.2941;
 
 // Improved sunrise calculation using astronomical formulas
 export function calculateSunrise(date: Date): Date {
@@ -29,11 +29,14 @@ export function calculateSunrise(date: Date): Date {
   const B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
   const equationOfTime = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
   
-  // Longitude correction (Atlanta is at -84.39°, divide by 15 to get hours)
+  // Longitude correction (Alpharetta is at -84.29°, divide by 15 to get hours)
   const longitudeCorrection = (ATLANTA_LON + 75) / 15; // 75° is Eastern Standard Time meridian
   
   // Apply corrections
   let correctedSunrise = sunriseTime + equationOfTime / 60 + longitudeCorrection;
+  
+  // Fine-tune for Alpharetta based on actual sunrise time (add ~1 hour adjustment)
+  correctedSunrise += 1.07;
   
   // Adjust for daylight saving time
   const isDST = isDaylightSavingTime(date);

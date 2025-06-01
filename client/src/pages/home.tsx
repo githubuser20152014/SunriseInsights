@@ -43,7 +43,7 @@ export default function Home() {
         {/* Location Status */}
         <div className="flex items-center justify-center space-x-2 text-sm text-slate-600">
           <i className="fas fa-map-marker-alt text-orange-500"></i>
-          <span>Atlanta, GA</span>
+          <span>Alpharetta, GA</span>
           <span>•</span>
           <span>Sunrise {sunrise?.formatted || "Loading..."}</span>
         </div>
