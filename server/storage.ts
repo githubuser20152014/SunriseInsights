@@ -29,7 +29,7 @@ export interface IStorage {
   updateDailyTask(id: number, completed: boolean): Promise<DailyTask | undefined>;
   deleteDailyTask(id: number): Promise<boolean>;
   
-  createDailyReflection(reflection: InsertDailyReflection): Promise<DailyReflection>;
+  createDailyReflection(reflection: InsertDailyReflection & { userId: number }): Promise<DailyReflection>;
   getDailyReflections(userId: number, limit?: number): Promise<DailyReflection[]>;
   
   getUserStats(userId: number): Promise<UserStats | undefined>;
