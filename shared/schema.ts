@@ -25,12 +25,21 @@ export const dailyTasks = pgTable("daily_tasks", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const dailyReflections = pgTable("daily_reflections", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  transcript: text("transcript").notNull(),
+  summary: text("summary"),
+  recordedAt: timestamp("recorded_at").defaultNow().notNull(),
+});
+
 export const userStats = pgTable("user_stats", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().unique(),
   dayStreak: integer("day_streak").default(0).notNull(),
   totalRecordings: integer("total_recordings").default(0).notNull(),
   totalCompletedTasks: integer("total_completed_tasks").default(0).notNull(),
+  totalReflections: integer("total_reflections").default(0).notNull(),
   lastActiveDate: text("last_active_date"), // YYYY-MM-DD format
 });
 
@@ -49,6 +58,11 @@ export const insertDailyTaskSchema = createInsertSchema(dailyTasks).omit({
   createdAt: true,
 });
 
+export const insertDailyReflectionSchema = createInsertSchema(dailyReflections).omit({
+  id: true,
+  recordedAt: true,
+});
+
 export const insertUserStatsSchema = createInsertSchema(userStats).omit({
   id: true,
 });
@@ -59,5 +73,7 @@ export type VoiceRecording = typeof voiceRecordings.$inferSelect;
 export type InsertVoiceRecording = z.infer<typeof insertVoiceRecordingSchema>;
 export type DailyTask = typeof dailyTasks.$inferSelect;
 export type InsertDailyTask = z.infer<typeof insertDailyTaskSchema>;
+export type DailyReflection = typeof dailyReflections.$inferSelect;
+export type InsertDailyReflection = z.infer<typeof insertDailyReflectionSchema>;
 export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;

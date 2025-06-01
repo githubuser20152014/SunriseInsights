@@ -2,6 +2,7 @@ import {
   users, 
   voiceRecordings, 
   dailyTasks, 
+  dailyReflections,
   userStats,
   type User, 
   type InsertUser,
@@ -9,6 +10,8 @@ import {
   type InsertVoiceRecording,
   type DailyTask,
   type InsertDailyTask,
+  type DailyReflection,
+  type InsertDailyReflection,
   type UserStats,
   type InsertUserStats
 } from "@shared/schema";
@@ -26,6 +29,9 @@ export interface IStorage {
   updateDailyTask(id: number, completed: boolean): Promise<DailyTask | undefined>;
   deleteDailyTask(id: number): Promise<boolean>;
   
+  createDailyReflection(reflection: InsertDailyReflection): Promise<DailyReflection>;
+  getDailyReflections(userId: number, limit?: number): Promise<DailyReflection[]>;
+  
   getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(userId: number, stats: Partial<UserStats>): Promise<UserStats>;
 }
@@ -34,20 +40,24 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private voiceRecordings: Map<number, VoiceRecording>;
   private dailyTasks: Map<number, DailyTask>;
+  private dailyReflections: Map<number, DailyReflection>;
   private userStats: Map<number, UserStats>;
   private currentId: number;
   private recordingId: number;
   private taskId: number;
+  private reflectionId: number;
   private statsId: number;
 
   constructor() {
     this.users = new Map();
     this.voiceRecordings = new Map();
     this.dailyTasks = new Map();
+    this.dailyReflections = new Map();
     this.userStats = new Map();
     this.currentId = 1;
     this.recordingId = 1;
     this.taskId = 1;
+    this.reflectionId = 1;
     this.statsId = 1;
   }
 
