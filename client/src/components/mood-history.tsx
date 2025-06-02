@@ -11,20 +11,23 @@ interface MoodEntry {
 }
 
 export function MoodHistory() {
+  // Get today's date in Eastern Time
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+
   // Load today's moods from database
   const { data: todaysMoods } = useQuery<MoodEntry[]>({
-    queryKey: ["/api/moods"],
+    queryKey: ["/api/moods", today],
     queryFn: async () => {
       const response = await fetch("/api/moods?limit=50");
       return response.json();
     },
   });
 
-  // Filter today's mood entries
-  const today = new Date().toISOString().split('T')[0];
-  const todayEntries = todaysMoods?.filter(mood => 
-    mood.timestamp.startsWith(today)
-  ) || [];
+  // Filter today's mood entries using Eastern Time
+  const todayEntries = todaysMoods?.filter(mood => {
+    const moodDate = new Date(mood.timestamp).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    return moodDate === today;
+  }) || [];
 
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString('en-US', {
