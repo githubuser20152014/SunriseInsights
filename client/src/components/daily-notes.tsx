@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 interface DailyNotesData {
   id?: number;
   content: string;
+  summary?: string;
   date: string;
   updatedAt?: string;
 }
@@ -21,6 +22,7 @@ export function DailyNotes() {
   const [viewingPastNote, setViewingPastNote] = useState<DailyNotesData | null>(null);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [showPastSummaries, setShowPastSummaries] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split('T')[0];
@@ -128,7 +130,7 @@ export function DailyNotes() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content: notes }),
+        body: JSON.stringify({ content: notes, date: today }),
       });
 
       if (!response.ok) {
@@ -137,6 +139,9 @@ export function DailyNotes() {
 
       const data = await response.json();
       setAiSummary(data.summary);
+      // Update the current notes data to include the summary
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-notes", today] });
+      queryClient.invalidateQueries({ queryKey: ["/api/search-notes"] });
       toast({
         title: "Summary generated",
         description: "AI has analyzed your notes and created a summary.",

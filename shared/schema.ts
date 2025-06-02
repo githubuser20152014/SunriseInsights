@@ -46,6 +46,7 @@ export const dailyNotes = pgTable("daily_notes", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   content: text("content").notNull(),
+  summary: text("summary"), // AI-generated summary and action items
   date: text("date").notNull(), // YYYY-MM-DD format
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

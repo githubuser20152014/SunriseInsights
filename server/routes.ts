@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { summarizeThoughts, generateMotivationalMessage } from "./lib/openai";
+import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
 import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema } from "@shared/schema";
 
@@ -304,14 +304,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Summarize daily notes with action items
   app.post("/api/summarize-notes", async (req, res) => {
     try {
-      const { content } = req.body;
+      const { content, date } = req.body;
       
       if (!content?.trim()) {
         return res.status(400).json({ error: "No content provided" });
       }
 
       const summary = await summarizeNotesWithActionItems(content);
-      res.json({ summary });
+      
+      // Save the summary with the notes
+      const userId = 1; // For demo purposes
+      const notesData = { content, summary, date: date || new Date().toISOString().split('T')[0], userId };
+      const savedNotes = await storage.saveDailyNotes(notesData);
+      
+      res.json({ summary, notes: savedNotes });
     } catch (error) {
       console.error("Failed to summarize notes:", error);
       res.status(500).json({ error: "Failed to generate summary" });
