@@ -96,18 +96,18 @@ export function MoodSelector() {
       </div>
       
       {!showNoteInput ? (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {moods.map((mood) => (
             <button
               key={mood.mood}
               onClick={() => handleMoodSelect(mood)}
-              className="group relative p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 transition-all duration-300 border border-slate-200 hover:border-slate-300"
+              className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 transition-all duration-300 border border-slate-200 hover:border-slate-300 min-h-[4rem] sm:min-h-[5rem]"
             >
               <div className="text-center space-y-2">
                 <div className="text-2xl transform group-hover:scale-110 transition-transform duration-300">
                   {mood.emoji}
                 </div>
-                <div className="text-xs font-medium text-slate-600 capitalize">
+                <div className="text-xs sm:text-sm font-medium text-slate-600 capitalize">
                   {mood.mood}
                 </div>
               </div>

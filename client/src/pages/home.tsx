@@ -47,7 +47,7 @@ export default function Home() {
 
       {/* Header */}
       <header className="glass-card sticky top-0 z-50 border-0 shadow-lg">
-        <div className="max-w-md mx-auto px-6 py-4">
+        <div className="max-w-md mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 gradient-sunset rounded-2xl flex items-center justify-center soft-glow">
@@ -62,7 +62,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
         {/* Header Section - Full Width */}
         <div className="mb-8 space-y-6">
           {/* Location Status */}
@@ -99,16 +99,16 @@ export default function Home() {
         </div>
 
         {/* Tasks and Notes Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <DailyTasks />
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <DailyNotes />
             <DailyGratitude />
           </div>
         </div>
 
         {/* Mood Tracking Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <MoodSelector />
           <MoodHistory />
         </div>
