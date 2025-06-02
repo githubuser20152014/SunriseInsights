@@ -47,6 +47,16 @@ export function DailyNotes() {
     enabled: false, // Only run when manually triggered
   });
 
+  // Load past summaries
+  const { data: pastSummaries } = useQuery<DailyNotesData[]>({
+    queryKey: ["/api/past-summaries"],
+    queryFn: async () => {
+      const response = await fetch("/api/search-notes?q=.");
+      const results = await response.json();
+      return results.filter((note: DailyNotesData) => note.summary);
+    },
+  });
+
   // Update local state when data loads
   useEffect(() => {
     if (notesData?.content) {
@@ -337,6 +347,38 @@ export function DailyNotes() {
           </div>
         )}
       </div>
+
+      {/* Past Summaries Section */}
+      {pastSummaries && pastSummaries.length > 0 && (
+        <div className="mb-4">
+          <Button
+            onClick={() => setShowPastSummaries(!showPastSummaries)}
+            variant="ghost"
+            size="sm"
+            className="text-slate-600 hover:text-slate-800 p-0"
+          >
+            <i className={`fas ${showPastSummaries ? 'fa-chevron-down' : 'fa-chevron-right'} mr-2`}></i>
+            View Past Summaries ({pastSummaries.length})
+          </Button>
+          
+          {showPastSummaries && (
+            <div className="mt-3 space-y-3 max-h-96 overflow-y-auto">
+              {pastSummaries.slice().reverse().map((result) => (
+                <div key={result.id} className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs text-slate-500">
+                      {formatDate(result.date)}
+                    </div>
+                  </div>
+                  <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                    {result.summary}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* AI Summary Display */}
       {aiSummary && (
