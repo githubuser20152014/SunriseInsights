@@ -101,7 +101,7 @@ export async function analyzeMoodJourney(moodEntries: Array<{ mood: string; emoj
         },
         {
           role: "user",
-          content: `Please analyze my mood journey for today and provide insights about my emotional patterns, transitions, and overall themes. Here are my mood entries: ${JSON.stringify(moodData)}`
+          content: `Please analyze my mood journey for today and provide insights about my emotional patterns, transitions, and overall themes. Return your analysis as JSON with an 'analysis' field. Here are my mood entries: ${JSON.stringify(moodData)}`
         }
       ],
       response_format: { type: "json_object" },
