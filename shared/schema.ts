@@ -51,6 +51,14 @@ export const dailyNotes = pgTable("daily_notes", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const dailyGratitude = pgTable("daily_gratitude", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  content: text("content").notNull(),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const userStats = pgTable("user_stats", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().unique(),
@@ -95,6 +103,12 @@ export const insertDailyNotesSchema = createInsertSchema(dailyNotes).omit({
   updatedAt: true,
 });
 
+export const insertDailyGratitudeSchema = createInsertSchema(dailyGratitude).omit({
+  id: true,
+  userId: true,
+  updatedAt: true,
+});
+
 export const insertUserStatsSchema = createInsertSchema(userStats).omit({
   id: true,
 });
@@ -111,5 +125,7 @@ export type Mood = typeof moods.$inferSelect;
 export type InsertMood = z.infer<typeof insertMoodSchema>;
 export type DailyNotes = typeof dailyNotes.$inferSelect;
 export type InsertDailyNotes = z.infer<typeof insertDailyNotesSchema>;
+export type DailyGratitude = typeof dailyGratitude.$inferSelect;
+export type InsertDailyGratitude = z.infer<typeof insertDailyGratitudeSchema>;
 export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;

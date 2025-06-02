@@ -5,6 +5,7 @@ import {
   dailyReflections,
   moods,
   dailyNotes,
+  dailyGratitude,
   userStats,
   type User, 
   type InsertUser,
@@ -18,6 +19,8 @@ import {
   type InsertMood,
   type DailyNotes,
   type InsertDailyNotes,
+  type DailyGratitude,
+  type InsertDailyGratitude,
   type UserStats,
   type InsertUserStats
 } from "@shared/schema";
@@ -46,6 +49,10 @@ export interface IStorage {
   saveDailyNotes(notes: InsertDailyNotes & { userId: number }): Promise<DailyNotes>;
   getDailyNotes(userId: number, date: string): Promise<DailyNotes | undefined>;
   searchDailyNotes(userId: number, searchTerm: string): Promise<DailyNotes[]>;
+  
+  saveDailyGratitude(gratitude: InsertDailyGratitude & { userId: number }): Promise<DailyGratitude>;
+  getDailyGratitude(userId: number, date: string): Promise<DailyGratitude | undefined>;
+  searchDailyGratitude(userId: number, searchTerm: string): Promise<DailyGratitude[]>;
   
   getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(userId: number, stats: Partial<UserStats>): Promise<UserStats>;
