@@ -5,6 +5,7 @@ import { DailyTasks } from "@/components/daily-tasks";
 import { MoodSelector } from "@/components/mood-selector";
 import { MoodHistory } from "@/components/mood-history";
 import { DailyNotes } from "@/components/daily-notes";
+import { DailyGratitude } from "@/components/daily-gratitude";
 import { DailyReflection } from "@/components/daily-reflection";
 import { ProgressStats } from "@/components/progress-stats";
 import { useDailyReset } from "@/hooks/use-daily-reset";
@@ -101,6 +102,11 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <DailyTasks />
           <DailyNotes />
+        </div>
+
+        {/* Gratitude Section */}
+        <div className="mb-8">
+          <DailyGratitude />
         </div>
 
         {/* Mood Tracking Row */}

@@ -448,6 +448,49 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
+  async saveDailyGratitude(gratitude: InsertDailyGratitude & { userId: number }): Promise<DailyGratitude> {
+    const [existingGratitude] = await db
+      .select()
+      .from(dailyGratitude)
+      .where(eq(dailyGratitude.userId, gratitude.userId) && eq(dailyGratitude.date, gratitude.date));
+
+    if (existingGratitude) {
+      const [updatedGratitude] = await db
+        .update(dailyGratitude)
+        .set({ 
+          content: gratitude.content,
+          updatedAt: new Date()
+        })
+        .where(eq(dailyGratitude.id, existingGratitude.id))
+        .returning();
+      return updatedGratitude;
+    } else {
+      const [newGratitude] = await db
+        .insert(dailyGratitude)
+        .values(gratitude)
+        .returning();
+      return newGratitude;
+    }
+  }
+
+  async getDailyGratitude(userId: number, date: string): Promise<DailyGratitude | undefined> {
+    const [gratitude] = await db
+      .select()
+      .from(dailyGratitude)
+      .where(eq(dailyGratitude.userId, userId) && eq(dailyGratitude.date, date));
+    return gratitude || undefined;
+  }
+
+  async searchDailyGratitude(userId: number, searchTerm: string): Promise<DailyGratitude[]> {
+    const results = await db
+      .select()
+      .from(dailyGratitude)
+      .where(sql`${dailyGratitude.userId} = ${userId} AND ${dailyGratitude.content} ILIKE ${`%${searchTerm}%`}`)
+      .orderBy(sql`${dailyGratitude.date} DESC`)
+      .limit(50);
+    return results;
+  }
+
   async updateUserStats(userId: number, updates: Partial<UserStats>): Promise<UserStats> {
     let [stats] = await db
       .select()

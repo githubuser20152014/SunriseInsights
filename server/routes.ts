@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
-import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema } from "@shared/schema";
+import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -347,6 +347,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to get user stats" });
+    }
+  });
+
+  // Save daily gratitude
+  app.post("/api/daily-gratitude", async (req, res) => {
+    try {
+      const validatedData = insertDailyGratitudeSchema.parse(req.body);
+      
+      // For demo purposes, using userId 1
+      const gratitudeData = {
+        ...validatedData,
+        userId: 1,
+      };
+
+      const gratitude = await storage.saveDailyGratitude(gratitudeData);
+      res.json(gratitude);
+    } catch (error) {
+      console.error("Failed to save gratitude:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      res.status(400).json({ message: "Failed to save gratitude", error: errorMessage });
+    }
+  });
+
+  // Get daily gratitude
+  app.get("/api/daily-gratitude", async (req, res) => {
+    try {
+      // For demo purposes, using userId 1
+      const userId = 1;
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ message: "Date parameter is required" });
+      }
+      
+      const gratitude = await storage.getDailyGratitude(userId, date);
+      res.json(gratitude || {});
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get gratitude" });
+    }
+  });
+
+  // Search gratitude entries
+  app.get("/api/search-gratitude", async (req, res) => {
+    try {
+      // For demo purposes, using userId 1
+      const userId = 1;
+      const searchTerm = req.query.q as string;
+      
+      if (!searchTerm || searchTerm.trim().length < 2) {
+        return res.json([]);
+      }
+      
+      const results = await storage.searchDailyGratitude(userId, searchTerm.trim());
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search gratitude entries" });
     }
   });
 
