@@ -16,13 +16,13 @@ interface MoodEntry {
 }
 
 const moods = [
-  { emoji: "😊", mood: "joyful", color: "from-yellow-400 to-orange-400", description: "Energetic and happy" },
-  { emoji: "😌", mood: "peaceful", color: "from-green-400 to-teal-400", description: "Calm and centered" },
+  { emoji: "😊", mood: "happy", color: "from-yellow-400 to-orange-400", description: "Cheerful and content" },
+  { emoji: "😌", mood: "calm", color: "from-green-400 to-teal-400", description: "Relaxed and centered" },
   { emoji: "🤔", mood: "reflective", color: "from-purple-400 to-indigo-400", description: "Thoughtful and contemplative" },
   { emoji: "😴", mood: "sleepy", color: "from-blue-400 to-purple-400", description: "Tired but content" },
   { emoji: "🌟", mood: "motivated", color: "from-pink-400 to-rose-400", description: "Ready to conquer the day" },
-  { emoji: "😐", mood: "neutral", color: "from-gray-400 to-slate-400", description: "Balanced and steady" },
-  { emoji: "🥺", mood: "vulnerable", color: "from-amber-400 to-yellow-400", description: "Sensitive and open" },
+  { emoji: "🙏", mood: "grateful", color: "from-amber-400 to-yellow-400", description: "Thankful and appreciative" },
+  { emoji: "🥺", mood: "vulnerable", color: "from-rose-400 to-pink-400", description: "Sensitive and open" },
   { emoji: "🔥", mood: "energized", color: "from-red-400 to-orange-400", description: "Full of energy and passion" },
   { emoji: "🤩", mood: "excited", color: "from-cyan-400 to-blue-400", description: "Thrilled and enthusiastic" },
   { emoji: "😢", mood: "upset", color: "from-indigo-400 to-purple-400", description: "Feeling down or distressed" },
