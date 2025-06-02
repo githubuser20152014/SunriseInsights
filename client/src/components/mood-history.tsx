@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useState } from "react";
 
 interface MoodEntry {
@@ -13,9 +13,19 @@ interface MoodEntry {
   timestamp: string;
 }
 
+interface MoodAnalysis {
+  id: number;
+  userId: number;
+  analysis: string;
+  date: string;
+  moodCount: number;
+  createdAt: string;
+}
+
 export function MoodHistory() {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<string>("");
+  const [showPastAnalyses, setShowPastAnalyses] = useState(false);
 
   // Get today's date in Eastern Time
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
@@ -25,6 +35,24 @@ export function MoodHistory() {
     queryKey: ["/api/moods", today],
     queryFn: async () => {
       const response = await fetch("/api/moods?limit=50");
+      return response.json();
+    },
+  });
+
+  // Load today's mood analysis if it exists
+  const { data: todaysAnalysis } = useQuery<MoodAnalysis>({
+    queryKey: ["/api/mood-analysis", today],
+    queryFn: async () => {
+      const response = await fetch(`/api/mood-analysis?date=${today}`);
+      return response.json();
+    },
+  });
+
+  // Load past mood analyses
+  const { data: pastAnalyses } = useQuery<MoodAnalysis[]>({
+    queryKey: ["/api/mood-analysis-history"],
+    queryFn: async () => {
+      const response = await fetch("/api/mood-analysis-history?limit=10");
       return response.json();
     },
   });
@@ -39,13 +67,17 @@ export function MoodHistory() {
   const analyzeMoodMutation = useMutation({
     mutationFn: async (moodEntries: MoodEntry[]) => {
       const response = await apiRequest("POST", "/api/analyze-mood-journey", {
-        moodEntries
+        moodEntries,
+        date: today
       });
       return response.json();
     },
     onSuccess: (data) => {
       setAnalysis(data.analysis);
       setShowAnalysis(true);
+      // Invalidate queries to refresh the saved analysis
+      queryClient.invalidateQueries({ queryKey: ["/api/mood-analysis", today] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mood-analysis-history"] });
     },
     onError: () => {
       setAnalysis("Unable to analyze mood journey at this time. Please try again later.");
@@ -58,6 +90,14 @@ export function MoodHistory() {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
+    });
+  };
+
+  const formatAnalysisDate = (date: string) => {
+    return new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
     });
   };
 
@@ -107,33 +147,86 @@ export function MoodHistory() {
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="flex items-center justify-between mb-3">
             <h5 className="text-sm font-medium text-slate-700">AI Mood Insights</h5>
-            <Button
-              onClick={() => analyzeMoodMutation.mutate(todayEntries)}
-              disabled={analyzeMoodMutation.isPending}
-              size="sm"
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-xs"
-            >
-              {analyzeMoodMutation.isPending ? (
-                <>
-                  <i className="fas fa-spinner fa-spin mr-1"></i>
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-brain mr-1"></i>
-                  Analyze Journey
-                </>
+            <div className="flex gap-2">
+              {(pastAnalyses && pastAnalyses.length > 0) && (
+                <Button
+                  onClick={() => setShowPastAnalyses(!showPastAnalyses)}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs border-purple-200 text-purple-600 hover:bg-purple-50"
+                >
+                  <i className="fas fa-history mr-1"></i>
+                  Past Insights
+                </Button>
               )}
-            </Button>
+              <Button
+                onClick={() => analyzeMoodMutation.mutate(todayEntries)}
+                disabled={analyzeMoodMutation.isPending}
+                size="sm"
+                className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-xs"
+              >
+                {analyzeMoodMutation.isPending ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin mr-1"></i>
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-brain mr-1"></i>
+                    {todaysAnalysis ? 'Refresh Analysis' : 'Analyze Journey'}
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
           
-          {showAnalysis && analysis && (
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200">
+          {/* Show today's analysis if it exists */}
+          {todaysAnalysis && (
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200 mb-4">
+              <div className="flex items-start space-x-2">
+                <i className="fas fa-lightbulb text-purple-600 text-sm mt-0.5"></i>
+                <div className="text-sm text-slate-700 leading-relaxed">
+                  {todaysAnalysis.analysis}
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Show newly generated analysis */}
+          {showAnalysis && analysis && !todaysAnalysis && (
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200 mb-4">
               <div className="flex items-start space-x-2">
                 <i className="fas fa-lightbulb text-purple-600 text-sm mt-0.5"></i>
                 <div className="text-sm text-slate-700 leading-relaxed">
                   {analysis}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Past analyses dropdown */}
+          {showPastAnalyses && pastAnalyses && pastAnalyses.length > 0 && (
+            <div className="mt-4 space-y-3">
+              <h6 className="text-xs font-medium text-slate-600 flex items-center">
+                <i className="fas fa-history mr-2"></i>
+                Previous AI Insights
+              </h6>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {pastAnalyses.slice(0, 5).map((pastAnalysis) => (
+                  <div key={pastAnalysis.id} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium text-slate-600">
+                        {formatAnalysisDate(pastAnalysis.date)}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {pastAnalysis.moodCount} mood{pastAnalysis.moodCount !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-700 leading-relaxed">
+                      {pastAnalysis.analysis}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
