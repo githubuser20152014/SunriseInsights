@@ -99,11 +99,12 @@ export function DailyNotes() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString + 'T00:00:00').toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'America/New_York'
     });
   };
 
