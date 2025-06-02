@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
-import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema } from "@shared/schema";
+import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema, insertMoodAnalysisSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -409,17 +409,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analyze mood journey for the day
   app.post("/api/analyze-mood-journey", async (req, res) => {
     try {
-      const { moodEntries } = req.body;
+      const { moodEntries, date } = req.body;
       
       if (!moodEntries || !Array.isArray(moodEntries)) {
         return res.status(400).json({ error: "Invalid mood entries provided" });
       }
 
       const analysis = await analyzeMoodJourney(moodEntries);
-      res.json({ analysis });
+      
+      // Save the analysis to database
+      const userId = 1; // For demo purposes
+      const analysisData = {
+        analysis,
+        date: date || new Date().toISOString().split('T')[0],
+        moodCount: moodEntries.length,
+        userId
+      };
+      
+      const savedAnalysis = await storage.saveMoodAnalysis(analysisData);
+      res.json({ analysis, saved: savedAnalysis });
     } catch (error) {
       console.error("Failed to analyze mood journey:", error);
       res.status(500).json({ error: "Failed to analyze mood journey" });
+    }
+  });
+
+  // Get mood analysis for a specific date
+  app.get("/api/mood-analysis", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ message: "Date parameter is required" });
+      }
+      
+      const analysis = await storage.getMoodAnalysis(userId, date);
+      res.json(analysis || {});
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mood analysis" });
+    }
+  });
+
+  // Get mood analysis history
+  app.get("/api/mood-analysis-history", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      const analyses = await storage.getMoodAnalysisHistory(userId, limit);
+      res.json(analyses);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get mood analysis history" });
     }
   });
 

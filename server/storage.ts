@@ -6,6 +6,7 @@ import {
   moods,
   dailyNotes,
   dailyGratitude,
+  moodAnalyses,
   userStats,
   type User, 
   type InsertUser,
@@ -21,6 +22,8 @@ import {
   type InsertDailyNotes,
   type DailyGratitude,
   type InsertDailyGratitude,
+  type MoodAnalysis,
+  type InsertMoodAnalysis,
   type UserStats,
   type InsertUserStats
 } from "@shared/schema";
@@ -53,6 +56,10 @@ export interface IStorage {
   saveDailyGratitude(gratitude: InsertDailyGratitude & { userId: number }): Promise<DailyGratitude>;
   getDailyGratitude(userId: number, date: string): Promise<DailyGratitude | undefined>;
   searchDailyGratitude(userId: number, searchTerm: string): Promise<DailyGratitude[]>;
+  
+  saveMoodAnalysis(analysis: InsertMoodAnalysis & { userId: number }): Promise<MoodAnalysis>;
+  getMoodAnalysis(userId: number, date: string): Promise<MoodAnalysis | undefined>;
+  getMoodAnalysisHistory(userId: number, limit?: number): Promise<MoodAnalysis[]>;
   
   getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(userId: number, stats: Partial<UserStats>): Promise<UserStats>;
@@ -488,6 +495,50 @@ export class DatabaseStorage implements IStorage {
       .where(sql`${dailyGratitude.userId} = ${userId} AND ${dailyGratitude.content} ILIKE ${`%${searchTerm}%`}`)
       .orderBy(sql`${dailyGratitude.date} DESC`)
       .limit(50);
+    return results;
+  }
+
+  async saveMoodAnalysis(analysis: InsertMoodAnalysis & { userId: number }): Promise<MoodAnalysis> {
+    const [existingAnalysis] = await db
+      .select()
+      .from(moodAnalyses)
+      .where(eq(moodAnalyses.userId, analysis.userId) && eq(moodAnalyses.date, analysis.date));
+
+    if (existingAnalysis) {
+      const [updatedAnalysis] = await db
+        .update(moodAnalyses)
+        .set({ 
+          analysis: analysis.analysis,
+          moodCount: analysis.moodCount,
+          createdAt: new Date()
+        })
+        .where(eq(moodAnalyses.id, existingAnalysis.id))
+        .returning();
+      return updatedAnalysis;
+    } else {
+      const [newAnalysis] = await db
+        .insert(moodAnalyses)
+        .values(analysis)
+        .returning();
+      return newAnalysis;
+    }
+  }
+
+  async getMoodAnalysis(userId: number, date: string): Promise<MoodAnalysis | undefined> {
+    const [analysis] = await db
+      .select()
+      .from(moodAnalyses)
+      .where(eq(moodAnalyses.userId, userId) && eq(moodAnalyses.date, date));
+    return analysis || undefined;
+  }
+
+  async getMoodAnalysisHistory(userId: number, limit = 10): Promise<MoodAnalysis[]> {
+    const results = await db
+      .select()
+      .from(moodAnalyses)
+      .where(eq(moodAnalyses.userId, userId))
+      .orderBy(sql`${moodAnalyses.date} DESC`)
+      .limit(limit);
     return results;
   }
 
