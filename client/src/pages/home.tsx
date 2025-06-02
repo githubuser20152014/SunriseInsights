@@ -101,12 +101,10 @@ export default function Home() {
         {/* Tasks and Notes Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <DailyTasks />
-          <DailyNotes />
-        </div>
-
-        {/* Gratitude Section */}
-        <div className="mb-8">
-          <DailyGratitude />
+          <div className="space-y-6">
+            <DailyNotes />
+            <DailyGratitude />
+          </div>
         </div>
 
         {/* Mood Tracking Row */}
