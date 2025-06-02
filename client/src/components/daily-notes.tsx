@@ -109,44 +109,103 @@ export function DailyNotes() {
 
   return (
     <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-            <i className="fas fa-edit text-blue-600 text-sm"></i>
+      <div className="space-y-4 mb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <i className="fas fa-edit text-blue-600 text-sm"></i>
+            </div>
+            <h3 className="text-lg font-medium text-slate-800">Daily Notes</h3>
           </div>
-          <h3 className="text-lg font-medium text-slate-800">Daily Notes</h3>
-        </div>
-        <div className="flex items-center space-x-2">
-          {notes.trim() && (
+          <div className="flex items-center space-x-2">
             <Button
+              onClick={() => setShowSearch(!showSearch)}
               variant="ghost"
               size="sm"
-              onClick={clearNotes}
-              className="text-xs text-slate-500 hover:text-red-600"
+              className="text-slate-500 hover:text-slate-700"
             >
-              <i className="fas fa-trash mr-1"></i>
-              Clear
+              <i className="fas fa-search mr-1"></i>
+              Search
             </Button>
-          )}
-          <Button
-            onClick={saveNotes}
-            disabled={saveNotesMutation.isPending || !notes.trim()}
-            size="sm"
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-          >
-            {saveNotesMutation.isPending ? (
-              <>
-                <i className="fas fa-spinner fa-spin mr-2"></i>
-                Saving...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-save mr-2"></i>
-                Save
-              </>
+            {notes.trim() && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearNotes}
+                className="text-xs text-slate-500 hover:text-red-600"
+              >
+                <i className="fas fa-trash mr-1"></i>
+                Clear
+              </Button>
             )}
-          </Button>
+            <Button
+              onClick={saveNotes}
+              disabled={saveNotesMutation.isPending || !notes.trim()}
+              size="sm"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+            >
+              {saveNotesMutation.isPending ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-save mr-2"></i>
+                  Save
+                </>
+              )}
+            </Button>
+          </div>
         </div>
+
+        {showSearch && (
+          <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                placeholder="Search your past notes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <Button
+                onClick={handleSearch}
+                disabled={!searchTerm || searchTerm.length < 2}
+                size="sm"
+                className="bg-blue-500 hover:bg-blue-600"
+              >
+                Search
+              </Button>
+            </div>
+            
+            {searchResults && searchResults.length > 0 && (
+              <div className="max-h-60 overflow-y-auto space-y-2">
+                <h4 className="text-sm font-medium text-slate-700">Search Results:</h4>
+                {searchResults.map((result) => (
+                  <div key={result.id} className="bg-white rounded p-3 border border-slate-200">
+                    <div className="text-xs text-slate-500 mb-1">
+                      {formatDate(result.date)}
+                    </div>
+                    <div className="text-sm text-slate-700">
+                      {result.content.length > 200 
+                        ? `${result.content.substring(0, 200)}...`
+                        : result.content
+                      }
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {searchResults && searchResults.length === 0 && searchTerm.length >= 2 && (
+              <div className="text-center py-4 text-slate-500 text-sm">
+                No notes found containing "{searchTerm}"
+              </div>
+            )}
+          </div>
+        )}
       </div>
       
       <div className="space-y-3">
