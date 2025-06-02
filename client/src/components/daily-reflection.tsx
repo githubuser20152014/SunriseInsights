@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,8 +18,18 @@ export function DailyReflection() {
   const [lastSummary, setLastSummary] = useState<string | null>(null);
   const [typedReflection, setTypedReflection] = useState("");
   const [useTextInput, setUseTextInput] = useState(false);
+  const [showPastReflections, setShowPastReflections] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Load past reflections
+  const { data: pastReflections } = useQuery<DailyReflection[]>({
+    queryKey: ["/api/daily-reflections"],
+    queryFn: async () => {
+      const response = await fetch("/api/daily-reflections");
+      return response.json();
+    },
+  });
 
   const createReflectionMutation = useMutation({
     mutationFn: async (transcript: string) => {
@@ -210,6 +220,60 @@ export function DailyReflection() {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Past Reflections Section */}
+        {pastReflections && pastReflections.length > 0 && (
+          <div className="mt-4">
+            <Button
+              onClick={() => setShowPastReflections(!showPastReflections)}
+              variant="ghost"
+              size="sm"
+              className="text-slate-600 hover:text-slate-800 p-0"
+            >
+              <i className={`fas ${showPastReflections ? 'fa-chevron-down' : 'fa-chevron-right'} mr-2`}></i>
+              View Past Reflections ({pastReflections.length})
+            </Button>
+            
+            {showPastReflections && (
+              <div className="mt-3 space-y-3 max-h-96 overflow-y-auto">
+                {pastReflections.map((reflection) => (
+                  <div key={reflection.id} className="bg-slate-50 rounded-lg p-4 border">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs text-slate-500">
+                        {new Date(reflection.recordedAt).toLocaleDateString('en-US', {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          timeZone: 'America/New_York'
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <h5 className="text-sm font-medium text-slate-700 mb-1">Reflection:</h5>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          {reflection.transcript}
+                        </p>
+                      </div>
+                      
+                      {reflection.summary && (
+                        <div>
+                          <h5 className="text-sm font-medium text-slate-700 mb-1">Daily Insight:</h5>
+                          <p className="text-sm text-slate-600 leading-relaxed">
+                            {reflection.summary}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
