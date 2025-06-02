@@ -18,6 +18,7 @@ export function DailyNotes() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [viewingPastNote, setViewingPastNote] = useState<DailyNotesData | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split('T')[0];
@@ -111,12 +112,39 @@ export function DailyNotes() {
   return (
     <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
       <div className="space-y-4 mb-4">
+        {viewingPastNote && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <i className="fas fa-history text-amber-600"></i>
+                <span className="text-sm text-amber-800">
+                  Viewing note from {formatDate(viewingPastNote.date)}
+                </span>
+              </div>
+              <Button
+                onClick={() => {
+                  setViewingPastNote(null);
+                  setNotes(notesData?.content || "");
+                }}
+                variant="ghost"
+                size="sm"
+                className="text-amber-700 hover:text-amber-900"
+              >
+                <i className="fas fa-arrow-left mr-1"></i>
+                Return to Today
+              </Button>
+            </div>
+          </div>
+        )}
+        
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
               <i className="fas fa-edit text-blue-600 text-sm"></i>
             </div>
-            <h3 className="text-lg font-medium text-slate-800">Daily Notes</h3>
+            <h3 className="text-lg font-medium text-slate-800">
+              {viewingPastNote ? `Notes from ${formatDate(viewingPastNote.date)}` : "Daily Notes"}
+            </h3>
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -128,7 +156,7 @@ export function DailyNotes() {
               <i className="fas fa-search mr-1"></i>
               Search
             </Button>
-            {notes.trim() && (
+            {!viewingPastNote && notes.trim() && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -139,24 +167,26 @@ export function DailyNotes() {
                 Clear
               </Button>
             )}
-            <Button
-              onClick={saveNotes}
-              disabled={saveNotesMutation.isPending || !notes.trim()}
-              size="sm"
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-            >
-              {saveNotesMutation.isPending ? (
-                <>
-                  <i className="fas fa-spinner fa-spin mr-2"></i>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-save mr-2"></i>
-                  Save
-                </>
-              )}
-            </Button>
+            {!viewingPastNote && (
+              <Button
+                onClick={saveNotes}
+                disabled={saveNotesMutation.isPending || !notes.trim()}
+                size="sm"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+              >
+                {saveNotesMutation.isPending ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin mr-2"></i>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-save mr-2"></i>
+                    Save
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -209,6 +239,7 @@ export function DailyNotes() {
                     className="bg-white rounded p-3 border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
                     onClick={() => {
                       setNotes(result.content);
+                      setViewingPastNote(result);
                       setShowSearch(false);
                     }}
                   >
@@ -240,10 +271,13 @@ export function DailyNotes() {
       
       <div className="space-y-3">
         <Textarea
-          placeholder="Jot down thoughts, ideas, reminders, or anything else that comes to mind throughout your day..."
+          placeholder={viewingPastNote ? "This is a past note (read-only)" : "Jot down thoughts, ideas, reminders, or anything else that comes to mind throughout your day..."}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="min-h-[120px] border-0 bg-slate-50 focus:ring-2 focus:ring-blue-500 resize-none"
+          disabled={!!viewingPastNote}
+          className={`min-h-[120px] border-0 focus:ring-2 focus:ring-blue-500 resize-none ${
+            viewingPastNote ? "bg-slate-100 cursor-not-allowed text-slate-600" : "bg-slate-50"
+          }`}
         />
         
         <div className="flex items-center justify-between text-xs text-slate-500">
