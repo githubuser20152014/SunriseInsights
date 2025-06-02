@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems } from "./lib/openai";
+import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
 import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema } from "@shared/schema";
 
@@ -403,6 +403,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(results);
     } catch (error) {
       res.status(500).json({ message: "Failed to search gratitude entries" });
+    }
+  });
+
+  // Analyze mood journey for the day
+  app.post("/api/analyze-mood-journey", async (req, res) => {
+    try {
+      const { moodEntries } = req.body;
+      
+      if (!moodEntries || !Array.isArray(moodEntries)) {
+        return res.status(400).json({ error: "Invalid mood entries provided" });
+      }
+
+      const analysis = await analyzeMoodJourney(moodEntries);
+      res.json({ analysis });
+    } catch (error) {
+      console.error("Failed to analyze mood journey:", error);
+      res.status(500).json({ error: "Failed to analyze mood journey" });
     }
   });
 

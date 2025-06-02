@@ -74,24 +74,44 @@ export async function generateMotivationalMessage(): Promise<{ text: string; aut
       author: result.author || "Unknown"
     };
   } catch (error) {
-    // Fallback to pre-written messages if OpenAI fails
-    const fallbackMessages = [
-      {
-        text: "The way to get started is to quit talking and begin doing. Every small step you take today brings you closer to your dreams.",
-        author: "Walt Disney"
-      },
-      {
-        text: "Your limitation—it's only your imagination. Push beyond what you thought possible today.",
-        author: "Unknown"
-      },
-      {
-        text: "Great things never come from comfort zones. Step boldly into today's possibilities.",
-        author: "Unknown"
-      }
-    ];
-    
-    const today = new Date().getDate();
-    return fallbackMessages[today % fallbackMessages.length];
+    console.error("OpenAI API error:", error);
+    throw new Error("Failed to generate motivational message");
+  }
+}
+
+export async function analyzeMoodJourney(moodEntries: Array<{ mood: string; emoji: string; note?: string; timestamp: string }>): Promise<string> {
+  if (moodEntries.length === 0) {
+    return "No mood entries to analyze today.";
+  }
+
+  try {
+    const moodData = moodEntries.map(entry => ({
+      time: new Date(entry.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      mood: entry.mood,
+      emoji: entry.emoji,
+      note: entry.note || null
+    }));
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an empathetic mood analyst that provides thoughtful insights about emotional patterns throughout the day. Analyze the mood journey using first-person perspective (I, my) as if the user is reflecting on their own emotional experience. Be supportive, insightful, and focus on patterns, transitions, and overall emotional themes. Keep the analysis concise but meaningful."
+        },
+        {
+          role: "user",
+          content: `Please analyze my mood journey for today and provide insights about my emotional patterns, transitions, and overall themes. Here are my mood entries: ${JSON.stringify(moodData)}`
+        }
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    return result.analysis || "Unable to analyze mood journey";
+  } catch (error) {
+    console.error("OpenAI API error:", error);
+    throw new Error("Failed to analyze mood journey");
   }
 }
 
