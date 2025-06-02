@@ -14,6 +14,9 @@ interface MoodEntry {
 }
 
 export function MoodHistory() {
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [analysis, setAnalysis] = useState<string>("");
+
   // Get today's date in Eastern Time
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
@@ -31,6 +34,24 @@ export function MoodHistory() {
     const moodDate = new Date(mood.timestamp).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
     return moodDate === today;
   }) || [];
+
+  // AI mood analysis mutation
+  const analyzeMoodMutation = useMutation({
+    mutationFn: async (moodEntries: MoodEntry[]) => {
+      const response = await apiRequest("POST", "/api/analyze-mood-journey", {
+        moodEntries
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setAnalysis(data.analysis);
+      setShowAnalysis(true);
+    },
+    onError: () => {
+      setAnalysis("Unable to analyze mood journey at this time. Please try again later.");
+      setShowAnalysis(true);
+    },
+  });
 
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString('en-US', {
@@ -80,6 +101,55 @@ export function MoodHistory() {
           </div>
         ))}
       </div>
+      
+      {/* AI Mood Analysis Section */}
+      {todayEntries.length >= 2 && (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="flex items-center justify-between mb-3">
+            <h5 className="text-sm font-medium text-slate-700">AI Mood Insights</h5>
+            <Button
+              onClick={() => analyzeMoodMutation.mutate(todayEntries)}
+              disabled={analyzeMoodMutation.isPending}
+              size="sm"
+              className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-xs"
+            >
+              {analyzeMoodMutation.isPending ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-1"></i>
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-brain mr-1"></i>
+                  Analyze Journey
+                </>
+              )}
+            </Button>
+          </div>
+          
+          {showAnalysis && analysis && (
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200">
+              <div className="flex items-start space-x-2">
+                <i className="fas fa-lightbulb text-purple-600 text-sm mt-0.5"></i>
+                <div className="text-sm text-slate-700 leading-relaxed">
+                  {analysis}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {todayEntries.length === 1 && (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="text-center py-3">
+            <div className="text-2xl mb-2">🎯</div>
+            <p className="text-xs text-slate-500">
+              Add another mood entry to get AI insights about your emotional journey today
+            </p>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
