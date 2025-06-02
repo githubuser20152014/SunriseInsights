@@ -7,6 +7,7 @@ import { MoodHistory } from "@/components/mood-history";
 import { DailyNotes } from "@/components/daily-notes";
 import { DailyReflection } from "@/components/daily-reflection";
 import { ProgressStats } from "@/components/progress-stats";
+import { useDailyReset } from "@/hooks/use-daily-reset";
 
 interface SunData {
   sunrise: {
@@ -20,6 +21,9 @@ interface SunData {
 }
 
 export default function Home() {
+  // Initialize daily reset functionality
+  useDailyReset();
+
   const { data: sunData } = useQuery<SunData>({
     queryKey: ["/api/sunrise"],
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
