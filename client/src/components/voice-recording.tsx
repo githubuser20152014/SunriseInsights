@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,9 +19,19 @@ export function VoiceRecording() {
   const [typedThoughts, setTypedThoughts] = useState("");
   const [useTextInput, setUseTextInput] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [showPastRecordings, setShowPastRecordings] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Load past recordings
+  const { data: pastRecordings } = useQuery<VoiceRecording[]>({
+    queryKey: ["/api/voice-recordings"],
+    queryFn: async () => {
+      const response = await fetch("/api/voice-recordings");
+      return response.json();
+    },
+  });
 
   const createRecordingMutation = useMutation({
     mutationFn: async (transcript: string) => {
@@ -213,6 +223,60 @@ export function VoiceRecording() {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Past Recordings Section */}
+        {pastRecordings && pastRecordings.length > 0 && (
+          <div className="mt-4">
+            <Button
+              onClick={() => setShowPastRecordings(!showPastRecordings)}
+              variant="ghost"
+              size="sm"
+              className="text-slate-600 hover:text-slate-800 p-0"
+            >
+              <i className={`fas ${showPastRecordings ? 'fa-chevron-down' : 'fa-chevron-right'} mr-2`}></i>
+              View Past Brain Dumps ({pastRecordings.length})
+            </Button>
+            
+            {showPastRecordings && (
+              <div className="mt-3 space-y-3 max-h-96 overflow-y-auto">
+                {pastRecordings.map((recording) => (
+                  <div key={recording.id} className="bg-slate-50 rounded-lg p-4 border">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs text-slate-500">
+                        {new Date(recording.recordedAt).toLocaleDateString('en-US', {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          timeZone: 'America/New_York'
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <h5 className="text-sm font-medium text-slate-700 mb-1">Transcript:</h5>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          {recording.transcript}
+                        </p>
+                      </div>
+                      
+                      {recording.summary && (
+                        <div>
+                          <h5 className="text-sm font-medium text-slate-700 mb-1">AI Summary:</h5>
+                          <p className="text-sm text-slate-600 leading-relaxed">
+                            {recording.summary}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
