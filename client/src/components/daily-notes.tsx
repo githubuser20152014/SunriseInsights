@@ -185,7 +185,14 @@ export function DailyNotes() {
               <div className="max-h-60 overflow-y-auto space-y-2">
                 <h4 className="text-sm font-medium text-slate-700">Search Results:</h4>
                 {searchResults.map((result) => (
-                  <div key={result.id} className="bg-white rounded p-3 border border-slate-200">
+                  <div 
+                    key={result.id} 
+                    className="bg-white rounded p-3 border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+                    onClick={() => {
+                      setNotes(result.content);
+                      setShowSearch(false);
+                    }}
+                  >
                     <div className="text-xs text-slate-500 mb-1">
                       {formatDate(result.date)}
                     </div>
@@ -194,6 +201,9 @@ export function DailyNotes() {
                         ? `${result.content.substring(0, 200)}...`
                         : result.content
                       }
+                    </div>
+                    <div className="text-xs text-blue-600 mt-1">
+                      Click to view full note
                     </div>
                   </div>
                 ))}
