@@ -283,6 +283,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search daily notes
+  app.get("/api/search-notes", async (req, res) => {
+    try {
+      // For demo purposes, using userId 1
+      const userId = 1;
+      const searchTerm = req.query.q as string;
+      
+      if (!searchTerm || searchTerm.trim().length < 2) {
+        return res.json([]);
+      }
+      
+      const results = await storage.searchDailyNotes(userId, searchTerm.trim());
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search daily notes" });
+    }
+  });
+
   // Get user stats
   app.get("/api/user-stats", async (req, res) => {
     try {

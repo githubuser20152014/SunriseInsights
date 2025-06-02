@@ -22,7 +22,7 @@ import {
   type InsertUserStats
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -45,6 +45,7 @@ export interface IStorage {
   
   saveDailyNotes(notes: InsertDailyNotes & { userId: number }): Promise<DailyNotes>;
   getDailyNotes(userId: number, date: string): Promise<DailyNotes | undefined>;
+  searchDailyNotes(userId: number, searchTerm: string): Promise<DailyNotes[]>;
   
   getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(userId: number, stats: Partial<UserStats>): Promise<UserStats>;
@@ -428,6 +429,16 @@ export class DatabaseStorage implements IStorage {
       .from(dailyNotes)
       .where(eq(dailyNotes.userId, userId) && eq(dailyNotes.date, date));
     return notes || undefined;
+  }
+
+  async searchDailyNotes(userId: number, searchTerm: string): Promise<DailyNotes[]> {
+    const results = await db
+      .select()
+      .from(dailyNotes)
+      .where(sql`${dailyNotes.userId} = ${userId} AND ${dailyNotes.content} ILIKE ${`%${searchTerm}%`}`)
+      .orderBy(sql`${dailyNotes.date} DESC`)
+      .limit(50);
+    return results;
   }
 
   async updateUserStats(userId: number, updates: Partial<UserStats>): Promise<UserStats> {

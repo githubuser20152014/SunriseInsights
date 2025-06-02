@@ -16,6 +16,8 @@ interface DailyNotesData {
 export function DailyNotes() {
   const [notes, setNotes] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split('T')[0];
@@ -27,6 +29,17 @@ export function DailyNotes() {
       const response = await fetch(`/api/daily-notes?date=${today}`);
       return response.json();
     },
+  });
+
+  // Search past notes
+  const { data: searchResults, refetch: searchNotes } = useQuery<DailyNotesData[]>({
+    queryKey: ["/api/search-notes", searchTerm],
+    queryFn: async () => {
+      if (!searchTerm || searchTerm.length < 2) return [];
+      const response = await fetch(`/api/search-notes?q=${encodeURIComponent(searchTerm)}`);
+      return response.json();
+    },
+    enabled: false, // Only run when manually triggered
   });
 
   // Update local state when data loads
@@ -77,6 +90,21 @@ export function DailyNotes() {
     setNotes("");
     setLastSaved(null);
     saveNotesMutation.mutate("");
+  };
+
+  const handleSearch = () => {
+    if (searchTerm && searchTerm.length >= 2) {
+      searchNotes();
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   return (
