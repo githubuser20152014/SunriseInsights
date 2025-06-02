@@ -239,6 +239,51 @@
   }
 }
 
+/* Mobile optimizations for iPhone */
+@media (max-width: 640px) {
+  /* Improve touch targets on mobile */
+  button:not(.btn-small) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for mobile */
+  .space-y-6 > * + * {
+    margin-top: 1rem;
+  }
+  
+  /* Prevent zoom on input focus for iOS */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Mobile-friendly cards with better spacing */
+  .p-6 {
+    padding: 1rem;
+  }
+  
+  /* Optimize text for mobile readability */
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+  
+  /* Better tap targets for mood selector */
+  .mood-button {
+    min-height: 4rem;
+    padding: 0.75rem;
+  }
+  
+  /* Disable hover effects on mobile */
+  @media (hover: none) {
+    .hover\:scale-105:hover {
+      transform: none;
+    }
+    .group:hover .group-hover\:scale-110 {
+      transform: none;
+    }
+  }
+}
+
 /* Custom sunrise color utilities */
 .bg-sunrise-50 { background-color: hsl(var(--sunrise-50)); }
 .bg-sunrise-100 { background-color: hsl(var(--sunrise-100)); }

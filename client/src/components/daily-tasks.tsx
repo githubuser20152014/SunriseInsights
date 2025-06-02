@@ -208,7 +208,7 @@ export function DailyTasks() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-5 h-5 p-0 border-2 border-slate-300 rounded-full flex items-center justify-center hover:border-emerald-500 transition-colors"
+                className="w-6 h-6 sm:w-5 sm:h-5 p-0 border-2 border-slate-300 rounded-full flex items-center justify-center hover:border-emerald-500 transition-colors min-h-[1.5rem] min-w-[1.5rem] sm:min-h-[1.25rem] sm:min-w-[1.25rem]"
                 onClick={() => toggleTask(task.id, task.completed)}
               >
                 {task.completed && (
@@ -224,7 +224,7 @@ export function DailyTasks() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-400 hover:text-red-500 transition-colors p-1"
+              className="text-slate-400 hover:text-red-500 transition-colors p-2 sm:p-1 min-h-[2rem] min-w-[2rem] sm:min-h-[1.5rem] sm:min-w-[1.5rem]"
               onClick={() => deleteTask(task.id)}
             >
               <i className="fas fa-times text-sm"></i>
