@@ -243,7 +243,7 @@ export function DailyNotes() {
         <div className="flex items-start space-x-2">
           <i className="fas fa-lightbulb text-blue-600 text-sm mt-0.5"></i>
           <div className="text-xs text-blue-700">
-            <strong>Quick tip:</strong> Your notes are saved locally for today. Use this space for capturing ideas, tracking mood changes, or noting important moments throughout your day.
+            <strong>Quick tip:</strong> Your notes are saved permanently and searchable across all days. Use this space for capturing ideas, tracking thoughts, or noting important moments - you can always find them later using the search feature.
           </div>
         </div>
       </div>
