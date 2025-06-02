@@ -111,17 +111,19 @@ Your task is to:
 4. Suggest any patterns or insights that might be valuable
 5. Present everything in a clear, organized format
 
+Important: Write in first person perspective using "I" statements, as if you are the person who wrote the notes reflecting on their own thoughts and activities.
+
 Format your response with clear sections:
 **Summary:**
-[Brief overview of main topics and themes]
+[Brief overview of main topics and themes using "I" statements]
 
 **Action Items:**
-[List specific tasks or follow-ups needed, if any]
+[List specific tasks or follow-ups I need to do, if any]
 
 **Important Notes:**
-[Key information, deadlines, or insights worth remembering]
+[Key information, deadlines, or insights I should remember]
 
-Be concise but thorough. If no clear action items exist, focus on summarizing the key themes and any valuable insights.`
+Be concise but thorough. If no clear action items exist, focus on summarizing the key themes and any valuable insights using first person language.`
         },
         {
           role: "user",
