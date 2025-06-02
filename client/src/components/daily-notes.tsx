@@ -19,6 +19,8 @@ export function DailyNotes() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [viewingPastNote, setViewingPastNote] = useState<DailyNotesData | null>(null);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split('T')[0];
@@ -109,6 +111,47 @@ export function DailyNotes() {
     });
   };
 
+  const generateSummary = async () => {
+    if (!notes.trim()) {
+      toast({
+        title: "No content to summarize",
+        description: "Please add some notes before generating a summary.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingSummary(true);
+    try {
+      const response = await fetch('/api/summarize-notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: notes }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate summary');
+      }
+
+      const data = await response.json();
+      setAiSummary(data.summary);
+      toast({
+        title: "Summary generated",
+        description: "AI has analyzed your notes and created a summary.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate summary. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
   return (
     <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
       <div className="space-y-4 mb-4">
@@ -168,24 +211,45 @@ export function DailyNotes() {
               </Button>
             )}
             {!viewingPastNote && (
-              <Button
-                onClick={saveNotes}
-                disabled={saveNotesMutation.isPending || !notes.trim()}
-                size="sm"
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-              >
-                {saveNotesMutation.isPending ? (
-                  <>
-                    <i className="fas fa-spinner fa-spin mr-2"></i>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <i className="fas fa-save mr-2"></i>
-                    Save
-                  </>
-                )}
-              </Button>
+              <>
+                <Button
+                  onClick={generateSummary}
+                  disabled={isGeneratingSummary || !notes.trim()}
+                  variant="outline"
+                  size="sm"
+                  className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                >
+                  {isGeneratingSummary ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-brain mr-2"></i>
+                      Generate Summary
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={saveNotes}
+                  disabled={saveNotesMutation.isPending || !notes.trim()}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                >
+                  {saveNotesMutation.isPending ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-save mr-2"></i>
+                      Save
+                    </>
+                  )}
+                </Button>
+              </>
             )}
           </div>
         </div>

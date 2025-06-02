@@ -238,7 +238,7 @@ export function DailyReflection() {
             
             {showPastReflections && (
               <div className="mt-3 space-y-3 max-h-96 overflow-y-auto">
-                {pastReflections.map((reflection) => (
+                {pastReflections.slice().reverse().map((reflection) => (
                   <div key={reflection.id} className="bg-slate-50 rounded-lg p-4 border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-xs text-slate-500">
