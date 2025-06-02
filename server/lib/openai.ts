@@ -94,3 +94,47 @@ export async function generateMotivationalMessage(): Promise<{ text: string; aut
     return fallbackMessages[today % fallbackMessages.length];
   }
 }
+
+export async function summarizeNotesWithActionItems(content: string): Promise<string> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: `You are an intelligent assistant that analyzes daily notes and provides helpful summaries with actionable insights. 
+
+Your task is to:
+1. Summarize the key themes and topics from the notes
+2. Identify any action items, tasks, or follow-ups mentioned
+3. Highlight important deadlines, appointments, or commitments
+4. Suggest any patterns or insights that might be valuable
+5. Present everything in a clear, organized format
+
+Format your response with clear sections:
+**Summary:**
+[Brief overview of main topics and themes]
+
+**Action Items:**
+[List specific tasks or follow-ups needed, if any]
+
+**Important Notes:**
+[Key information, deadlines, or insights worth remembering]
+
+Be concise but thorough. If no clear action items exist, focus on summarizing the key themes and any valuable insights.`
+        },
+        {
+          role: "user",
+          content: `Please analyze these daily notes and provide a summary with action items:\n\n${content}`
+        }
+      ],
+      max_tokens: 300,
+      temperature: 0.7,
+    });
+
+    return response.choices[0].message.content || "Unable to generate summary at this time.";
+  } catch (error) {
+    console.error("Failed to summarize notes:", error);
+    throw new Error("Failed to generate summary. Please try again.");
+  }
+}

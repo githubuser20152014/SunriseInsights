@@ -332,6 +332,31 @@ export function DailyNotes() {
           </div>
         )}
       </div>
+
+      {/* AI Summary Display */}
+      {aiSummary && (
+        <div className="mb-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4">
+          <div className="flex items-start space-x-3">
+            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <i className="fas fa-brain text-purple-600 text-sm"></i>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-medium text-slate-800 mb-2">AI Summary & Action Items</h4>
+              <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                {aiSummary}
+              </div>
+            </div>
+            <Button
+              onClick={() => setAiSummary(null)}
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-slate-600"
+            >
+              <i className="fas fa-times"></i>
+            </Button>
+          </div>
+        </div>
+      )}
       
       <div className="space-y-3">
         <Textarea

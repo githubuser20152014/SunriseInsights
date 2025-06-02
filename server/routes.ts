@@ -301,6 +301,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Summarize daily notes with action items
+  app.post("/api/summarize-notes", async (req, res) => {
+    try {
+      const { content } = req.body;
+      
+      if (!content?.trim()) {
+        return res.status(400).json({ error: "No content provided" });
+      }
+
+      const summary = await summarizeNotesWithActionItems(content);
+      res.json({ summary });
+    } catch (error) {
+      console.error("Failed to summarize notes:", error);
+      res.status(500).json({ error: "Failed to generate summary" });
+    }
+  });
+
   // Get user stats
   app.get("/api/user-stats", async (req, res) => {
     try {
