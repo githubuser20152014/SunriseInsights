@@ -162,6 +162,25 @@ export function DailyNotes() {
 
         {showSearch && (
           <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium text-slate-700">Search Past Notes</h4>
+              <Button
+                onClick={() => {
+                  setShowSearch(false);
+                  setSearchTerm("");
+                  // Load today's notes back
+                  if (notesData?.content) {
+                    setNotes(notesData.content);
+                  }
+                }}
+                variant="ghost"
+                size="sm"
+                className="text-slate-500 hover:text-slate-700"
+              >
+                <i className="fas fa-times mr-1"></i>
+                Close
+              </Button>
+            </div>
             <div className="flex space-x-2">
               <input
                 type="text"
