@@ -23,6 +23,7 @@ export function DailyNotes() {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [showPastSummaries, setShowPastSummaries] = useState(false);
+  const [showPastNotes, setShowPastNotes] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   // Get today's date in Eastern Time for proper daily reset
@@ -55,6 +56,16 @@ export function DailyNotes() {
       const response = await fetch("/api/search-notes?q=.");
       const results = await response.json();
       return results.filter((note: DailyNotesData) => note.summary);
+    },
+  });
+
+  // Load all past notes
+  const { data: allPastNotes } = useQuery<DailyNotesData[]>({
+    queryKey: ["/api/all-past-notes"],
+    queryFn: async () => {
+      const response = await fetch("/api/search-notes?q=.");
+      const results = await response.json();
+      return results.filter((note: DailyNotesData) => note.date !== today && note.content.trim());
     },
   });
 
@@ -211,6 +222,17 @@ export function DailyNotes() {
             </h3>
           </div>
           <div className="flex items-center space-x-2">
+            {allPastNotes && allPastNotes.length > 0 && (
+              <Button
+                onClick={() => setShowPastNotes(!showPastNotes)}
+                variant="ghost"
+                size="sm"
+                className="text-slate-500 hover:text-slate-700"
+              >
+                <i className="fas fa-history mr-1"></i>
+                Past Notes
+              </Button>
+            )}
             <Button
               onClick={() => setShowSearch(!showSearch)}
               variant="ghost"
@@ -220,6 +242,20 @@ export function DailyNotes() {
               <i className="fas fa-search mr-1"></i>
               Search
             </Button>
+            {viewingPastNote && (
+              <Button
+                onClick={() => {
+                  setViewingPastNote(null);
+                  setAiSummary(null);
+                }}
+                variant="outline"
+                size="sm"
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                <i className="fas fa-arrow-left mr-1"></i>
+                Back to Today
+              </Button>
+            )}
             {!viewingPastNote && notes.trim() && (
               <Button
                 variant="ghost"
@@ -353,6 +389,51 @@ export function DailyNotes() {
           </div>
         )}
       </div>
+
+      {/* Past Notes Section */}
+      {showPastNotes && allPastNotes && allPastNotes.length > 0 && (
+        <div className="mb-4">
+          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+            <h4 className="text-sm font-medium text-slate-700 mb-3 flex items-center">
+              <i className="fas fa-history mr-2"></i>
+              Past Daily Notes ({allPastNotes.length})
+            </h4>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {allPastNotes.slice().reverse().slice(0, 10).map((note) => (
+                <div 
+                  key={note.id} 
+                  className="bg-white rounded-lg p-3 border border-slate-200 hover:border-blue-300 cursor-pointer transition-colors"
+                  onClick={() => {
+                    setViewingPastNote(note);
+                    setShowPastNotes(false);
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs text-slate-500">
+                      {formatDate(note.date)}
+                    </div>
+                    {note.summary && (
+                      <div className="text-xs text-purple-600 flex items-center">
+                        <i className="fas fa-brain mr-1"></i>
+                        AI Summary
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-sm text-slate-700 leading-relaxed">
+                    {note.content.length > 150 
+                      ? `${note.content.substring(0, 150)}...`
+                      : note.content
+                    }
+                  </div>
+                  <div className="text-xs text-blue-600 mt-2">
+                    Click to view full note
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Past Summaries Section */}
       {pastSummaries && pastSummaries.length > 0 && (
