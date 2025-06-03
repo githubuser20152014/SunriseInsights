@@ -290,12 +290,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = 1;
       const searchTerm = req.query.q as string;
       
-      if (!searchTerm || searchTerm.trim().length < 2) {
+      if (!searchTerm || searchTerm.trim().length < 1) {
         return res.json([]);
       }
       
-      const results = await storage.searchDailyNotes(userId, searchTerm.trim());
-      res.json(results);
+      // If search term is "." (wildcard), get all notes
+      if (searchTerm.trim() === ".") {
+        const results = await storage.getAllDailyNotes(userId);
+        res.json(results);
+      } else {
+        const results = await storage.searchDailyNotes(userId, searchTerm.trim());
+        res.json(results);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to search daily notes" });
     }

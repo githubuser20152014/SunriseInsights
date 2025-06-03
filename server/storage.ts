@@ -52,6 +52,7 @@ export interface IStorage {
   saveDailyNotes(notes: InsertDailyNotes & { userId: number }): Promise<DailyNotes>;
   getDailyNotes(userId: number, date: string): Promise<DailyNotes | undefined>;
   searchDailyNotes(userId: number, searchTerm: string): Promise<DailyNotes[]>;
+  getAllDailyNotes(userId: number): Promise<DailyNotes[]>;
   
   saveDailyGratitude(gratitude: InsertDailyGratitude & { userId: number }): Promise<DailyGratitude>;
   getDailyGratitude(userId: number, date: string): Promise<DailyGratitude | undefined>;
@@ -452,6 +453,16 @@ export class DatabaseStorage implements IStorage {
       .where(sql`${dailyNotes.userId} = ${userId} AND ${dailyNotes.content} ILIKE ${`%${searchTerm}%`}`)
       .orderBy(sql`${dailyNotes.date} DESC`)
       .limit(50);
+    return results;
+  }
+
+  async getAllDailyNotes(userId: number): Promise<DailyNotes[]> {
+    const results = await db
+      .select()
+      .from(dailyNotes)
+      .where(eq(dailyNotes.userId, userId))
+      .orderBy(sql`${dailyNotes.date} DESC`)
+      .limit(100);
     return results;
   }
 
