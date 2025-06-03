@@ -508,7 +508,7 @@ export function DailyNotes() {
           
           {showPastNotes && (
             <div className="mt-3 space-y-3 max-h-96 overflow-y-auto">
-              {allPastNotes.slice().reverse().slice(0, 10).map((note) => (
+              {allPastNotes.slice(0, 10).map((note) => (
                 <div 
                   key={note.id} 
                   className="bg-slate-50 rounded-lg p-3 border border-slate-200 hover:border-blue-300 cursor-pointer transition-colors"
