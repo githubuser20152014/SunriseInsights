@@ -25,7 +25,8 @@ export function DailyNotes() {
   const [showPastSummaries, setShowPastSummaries] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const today = new Date().toISOString().split('T')[0];
+  // Get today's date in Eastern Time for proper daily reset
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
   // Load notes from database
   const { data: notesData } = useQuery<DailyNotesData>({
@@ -57,15 +58,20 @@ export function DailyNotes() {
     },
   });
 
-  // Update local state when data loads
+  // Update local state when data loads, including clearing for new day
   useEffect(() => {
-    if (notesData?.content) {
-      setNotes(notesData.content);
+    if (notesData) {
+      setNotes(notesData.content || "");
       if (notesData.updatedAt) {
         setLastSaved(new Date(notesData.updatedAt));
+      } else {
+        setLastSaved(null);
       }
+      // Clear AI summary and viewing state when switching days
+      setAiSummary(null);
+      setViewingPastNote(null);
     }
-  }, [notesData]);
+  }, [notesData, today]);
 
   const saveNotesMutation = useMutation({
     mutationFn: async (content: string) => {
