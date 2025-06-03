@@ -71,18 +71,31 @@ export function DailyNotes() {
 
   // Update local state when data loads, including clearing for new day
   useEffect(() => {
-    if (notesData) {
+    if (notesData && !viewingPastNote) {
       setNotes(notesData.content || "");
       if (notesData.updatedAt) {
         setLastSaved(new Date(notesData.updatedAt));
       } else {
         setLastSaved(null);
       }
-      // Clear AI summary and viewing state when switching days
+      // Clear AI summary when switching days
       setAiSummary(null);
-      setViewingPastNote(null);
     }
   }, [notesData, today]);
+
+  // Update state when viewing a past note
+  useEffect(() => {
+    if (viewingPastNote) {
+      setNotes(viewingPastNote.content || "");
+      if (viewingPastNote.updatedAt) {
+        setLastSaved(new Date(viewingPastNote.updatedAt));
+      } else {
+        setLastSaved(null);
+      }
+      // Show AI summary if available for past note
+      setAiSummary(viewingPastNote.summary || null);
+    }
+  }, [viewingPastNote]);
 
   const saveNotesMutation = useMutation({
     mutationFn: async (content: string) => {
@@ -236,6 +249,15 @@ export function DailyNotes() {
                 onClick={() => {
                   setViewingPastNote(null);
                   setAiSummary(null);
+                  // Restore today's notes content
+                  if (notesData) {
+                    setNotes(notesData.content || "");
+                    if (notesData.updatedAt) {
+                      setLastSaved(new Date(notesData.updatedAt));
+                    } else {
+                      setLastSaved(null);
+                    }
+                  }
                 }}
                 variant="outline"
                 size="sm"
