@@ -433,7 +433,7 @@ export class DatabaseStorage implements IStorage {
     const [existingNotes] = await db
       .select()
       .from(dailyNotes)
-      .where(eq(dailyNotes.userId, notes.userId) && eq(dailyNotes.date, notes.date));
+      .where(and(eq(dailyNotes.userId, notes.userId), eq(dailyNotes.date, notes.date)));
 
     if (existingNotes) {
       // Update existing notes
@@ -457,7 +457,7 @@ export class DatabaseStorage implements IStorage {
     const [notes] = await db
       .select()
       .from(dailyNotes)
-      .where(eq(dailyNotes.userId, userId) && eq(dailyNotes.date, date));
+      .where(and(eq(dailyNotes.userId, userId), eq(dailyNotes.date, date)));
     return notes || undefined;
   }
 
@@ -485,7 +485,7 @@ export class DatabaseStorage implements IStorage {
     const [existingGratitude] = await db
       .select()
       .from(dailyGratitude)
-      .where(eq(dailyGratitude.userId, gratitude.userId) && eq(dailyGratitude.date, gratitude.date));
+      .where(and(eq(dailyGratitude.userId, gratitude.userId), eq(dailyGratitude.date, gratitude.date)));
 
     if (existingGratitude) {
       const [updatedGratitude] = await db
@@ -510,7 +510,7 @@ export class DatabaseStorage implements IStorage {
     const [gratitude] = await db
       .select()
       .from(dailyGratitude)
-      .where(eq(dailyGratitude.userId, userId) && eq(dailyGratitude.date, date));
+      .where(and(eq(dailyGratitude.userId, userId), eq(dailyGratitude.date, date)));
     return gratitude || undefined;
   }
 
@@ -528,7 +528,7 @@ export class DatabaseStorage implements IStorage {
     const [existingAnalysis] = await db
       .select()
       .from(moodAnalyses)
-      .where(eq(moodAnalyses.userId, analysis.userId) && eq(moodAnalyses.date, analysis.date));
+      .where(and(eq(moodAnalyses.userId, analysis.userId), eq(moodAnalyses.date, analysis.date)));
 
     if (existingAnalysis) {
       const [updatedAnalysis] = await db
@@ -554,7 +554,7 @@ export class DatabaseStorage implements IStorage {
     const [analysis] = await db
       .select()
       .from(moodAnalyses)
-      .where(eq(moodAnalyses.userId, userId) && eq(moodAnalyses.date, date));
+      .where(and(eq(moodAnalyses.userId, userId), eq(moodAnalyses.date, date)));
     return analysis || undefined;
   }
 
@@ -597,6 +597,81 @@ export class DatabaseStorage implements IStorage {
     }
     
     return stats;
+  }
+
+  async saveTimeLogEntry(entry: InsertTimeLog & { userId: number }): Promise<TimeLog> {
+    const [timeLogEntry] = await db
+      .insert(timeLog)
+      .values(entry)
+      .onConflictDoUpdate({
+        target: [timeLog.userId, timeLog.date, timeLog.timeSlot],
+        set: {
+          activity: sql`excluded.activity`,
+          updatedAt: sql`now()`
+        }
+      })
+      .returning();
+    return timeLogEntry;
+  }
+
+  async getTimeLogEntries(userId: number, date: string): Promise<TimeLog[]> {
+    return await db
+      .select()
+      .from(timeLog)
+      .where(and(eq(timeLog.userId, userId), eq(timeLog.date, date)))
+      .orderBy(timeLog.timeSlot);
+  }
+
+  async updateTimeLogEntry(id: number, activity: string): Promise<TimeLog | undefined> {
+    const [updatedEntry] = await db
+      .update(timeLog)
+      .set({ 
+        activity,
+        updatedAt: sql`now()`
+      })
+      .where(eq(timeLog.id, id))
+      .returning();
+    return updatedEntry || undefined;
+  }
+
+  async deleteTimeLogEntry(id: number): Promise<boolean> {
+    const result = await db
+      .delete(timeLog)
+      .where(eq(timeLog.id, id));
+    return result.rowCount > 0;
+  }
+
+  async saveTimeLogSummary(summary: InsertTimeLogSummary & { userId: number }): Promise<TimeLogSummary> {
+    const [timeLogSummaryEntry] = await db
+      .insert(timeLogSummary)
+      .values(summary)
+      .onConflictDoUpdate({
+        target: [timeLogSummary.userId, timeLogSummary.date],
+        set: {
+          summary: sql`excluded.summary`,
+          totalEntries: sql`excluded.total_entries`,
+          createdAt: sql`now()`
+        }
+      })
+      .returning();
+    return timeLogSummaryEntry;
+  }
+
+  async getTimeLogSummary(userId: number, date: string): Promise<TimeLogSummary | undefined> {
+    const [summary] = await db
+      .select()
+      .from(timeLogSummary)
+      .where(and(eq(timeLogSummary.userId, userId), eq(timeLogSummary.date, date)));
+    return summary || undefined;
+  }
+
+  async getTimeLogSummaryHistory(userId: number, limit = 10): Promise<TimeLogSummary[]> {
+    return await db
+      .select()
+      .from(timeLogSummary)
+      .where(eq(timeLogSummary.userId, userId))
+      .orderBy(sql`${timeLogSummary.date} DESC`)
+      .limit(limit);
   }
 }
 
