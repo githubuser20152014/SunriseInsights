@@ -160,3 +160,32 @@ Be concise but thorough. If no clear action items exist, focus on summarizing th
     throw new Error("Failed to generate summary. Please try again.");
   }
 }
+
+export async function summarizeTimeLog(timeEntries: Array<{ timeSlot: string; activity: string }>): Promise<string> {
+  try {
+    const timeLogText = timeEntries
+      .map(entry => `${entry.timeSlot}: ${entry.activity}`)
+      .join('\n');
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are a time management analyst. Analyze the daily time log and provide an insightful summary of how the person spent their day. Identify patterns, productivity peaks, areas for improvement, and overall time allocation. Keep the summary concise but meaningful, focusing on productivity insights and work-life balance observations. Use first person perspective with 'I' statements."
+        },
+        {
+          role: "user",
+          content: `Please analyze this time log and provide a productivity summary:\n\n${timeLogText}`
+        }
+      ],
+      max_tokens: 400,
+      temperature: 0.7,
+    });
+
+    return response.choices[0].message.content || "Unable to generate time log summary";
+  } catch (error) {
+    console.error("Error summarizing time log:", error);
+    throw new Error("Failed to generate time log summary");
+  }
+}

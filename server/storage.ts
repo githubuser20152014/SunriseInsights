@@ -600,18 +600,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async saveTimeLogEntry(entry: InsertTimeLog & { userId: number }): Promise<TimeLog> {
-    const [timeLogEntry] = await db
-      .insert(timeLog)
-      .values(entry)
-      .onConflictDoUpdate({
-        target: [timeLog.userId, timeLog.date, timeLog.timeSlot],
-        set: {
-          activity: sql`excluded.activity`,
+    // Check if entry exists for this user, date, and time slot
+    const [existingEntry] = await db
+      .select()
+      .from(timeLog)
+      .where(and(
+        eq(timeLog.userId, entry.userId),
+        eq(timeLog.date, entry.date),
+        eq(timeLog.timeSlot, entry.timeSlot)
+      ));
+
+    if (existingEntry) {
+      // Update existing entry
+      const [updatedEntry] = await db
+        .update(timeLog)
+        .set({ 
+          activity: entry.activity,
           updatedAt: sql`now()`
-        }
-      })
-      .returning();
-    return timeLogEntry;
+        })
+        .where(eq(timeLog.id, existingEntry.id))
+        .returning();
+      return updatedEntry;
+    } else {
+      // Create new entry
+      const [newEntry] = await db
+        .insert(timeLog)
+        .values(entry)
+        .returning();
+      return newEntry;
+    }
   }
 
   async getTimeLogEntries(userId: number, date: string): Promise<TimeLog[]> {
@@ -638,7 +655,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(timeLog)
       .where(eq(timeLog.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async saveTimeLogSummary(summary: InsertTimeLogSummary & { userId: number }): Promise<TimeLogSummary> {

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney } from "./lib/openai";
+import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney, summarizeTimeLog } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
 import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema, insertMoodAnalysisSchema, insertTimeLogSchema, insertTimeLogSummarySchema } from "@shared/schema";
 
@@ -536,6 +536,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete time log entry" });
+    }
+  });
+
+  // Generate AI summary for time log
+  app.post("/api/generate-time-summary", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const { date } = req.body;
+      
+      if (!date) {
+        return res.status(400).json({ message: "Date is required" });
+      }
+      
+      // Get time entries for the date
+      const timeEntries = await storage.getTimeLogEntries(userId, date);
+      
+      if (timeEntries.length === 0) {
+        return res.status(400).json({ message: "No time entries found for this date" });
+      }
+      
+      // Generate AI summary
+      const aiSummary = await summarizeTimeLog(timeEntries.map(entry => ({
+        timeSlot: entry.timeSlot,
+        activity: entry.activity
+      })));
+      
+      // Save the summary
+      const summary = await storage.saveTimeLogSummary({
+        date,
+        summary: aiSummary,
+        totalEntries: timeEntries.length,
+        userId
+      });
+      
+      res.json(summary);
+    } catch (error) {
+      console.error("Error generating time summary:", error);
+      res.status(500).json({ message: "Failed to generate time log summary" });
     }
   });
 

@@ -117,14 +117,8 @@ export function TimeTracker() {
   const generateSummaryMutation = useMutation({
     mutationFn: async () => {
       setIsGeneratingAISummary(true);
-      const entriesText = timeEntries
-        .map(entry => `${entry.timeSlot}: ${entry.activity}`)
-        .join('\n');
-      
-      const response = await apiRequest("POST", "/api/time-log-summary", {
-        date: today,
-        summary: `AI-generated summary of ${timeEntries.length} time entries for ${today}`,
-        totalEntries: timeEntries.length
+      const response = await apiRequest("POST", "/api/generate-time-summary", {
+        date: today
       });
       return response.json();
     },
