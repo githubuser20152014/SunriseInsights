@@ -662,12 +662,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ]);
 
       // Filter data for the specific date
-      const todayMoods = moods.filter(mood => mood.timestamp.startsWith(date));
+      const todayMoods = moods.filter(mood => mood.timestamp.toISOString().startsWith(date));
       const todayReflections = dailyReflections.filter(reflection => 
-        reflection.recordedAt.startsWith(date)
+        reflection.recordedAt.toISOString().startsWith(date)
       );
       const todayVoiceRecordings = voiceRecordings.filter(recording => 
-        recording.recordedAt.startsWith(date)
+        recording.recordedAt.toISOString().startsWith(date)
       );
 
       // Prepare data for AI analysis
@@ -679,7 +679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mood: mood.mood,
           emoji: mood.emoji,
           note: mood.note || '',
-          timestamp: mood.timestamp
+          timestamp: mood.timestamp.toISOString()
         })),
         reflection: todayReflections.map(r => r.transcript).join(' '),
         tasks: dailyTasks.map(task => ({

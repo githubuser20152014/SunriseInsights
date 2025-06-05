@@ -9,6 +9,7 @@ import { DailyGratitude } from "@/components/daily-gratitude";
 import { DailyReflection } from "@/components/daily-reflection";
 import { ProgressStats } from "@/components/progress-stats";
 import { TimeTracker } from "@/components/time-tracker";
+import { DailySummary } from "@/components/daily-summary";
 import { useDailyReset } from "@/hooks/use-daily-reset";
 
 interface SunData {
@@ -170,6 +171,11 @@ export default function Home() {
         {/* Progress Stats */}
         <div className="mb-8">
           <ProgressStats />
+        </div>
+
+        {/* Today's Summary */}
+        <div className="mb-8">
+          <DailySummary />
         </div>
 
         {/* Bottom padding for elegant spacing */}
