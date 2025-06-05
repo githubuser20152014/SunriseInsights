@@ -68,6 +68,25 @@ export const moodAnalyses = pgTable("mood_analyses", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const timeLog = pgTable("time_log", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  timeSlot: text("time_slot").notNull(), // "05:00", "05:30", etc.
+  activity: text("activity").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const timeLogSummary = pgTable("time_log_summary", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  summary: text("summary").notNull(),
+  totalEntries: integer("total_entries").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const userStats = pgTable("user_stats", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().unique(),
@@ -124,6 +143,19 @@ export const insertMoodAnalysisSchema = createInsertSchema(moodAnalyses).omit({
   createdAt: true,
 });
 
+export const insertTimeLogSchema = createInsertSchema(timeLog).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTimeLogSummarySchema = createInsertSchema(timeLogSummary).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+});
+
 export const insertUserStatsSchema = createInsertSchema(userStats).omit({
   id: true,
 });
@@ -144,5 +176,9 @@ export type DailyGratitude = typeof dailyGratitude.$inferSelect;
 export type InsertDailyGratitude = z.infer<typeof insertDailyGratitudeSchema>;
 export type MoodAnalysis = typeof moodAnalyses.$inferSelect;
 export type InsertMoodAnalysis = z.infer<typeof insertMoodAnalysisSchema>;
+export type TimeLog = typeof timeLog.$inferSelect;
+export type InsertTimeLog = z.infer<typeof insertTimeLogSchema>;
+export type TimeLogSummary = typeof timeLogSummary.$inferSelect;
+export type InsertTimeLogSummary = z.infer<typeof insertTimeLogSummarySchema>;
 export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;

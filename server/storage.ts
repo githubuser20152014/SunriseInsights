@@ -7,6 +7,8 @@ import {
   dailyNotes,
   dailyGratitude,
   moodAnalyses,
+  timeLog,
+  timeLogSummary,
   userStats,
   type User, 
   type InsertUser,
@@ -24,6 +26,10 @@ import {
   type InsertDailyGratitude,
   type MoodAnalysis,
   type InsertMoodAnalysis,
+  type TimeLog,
+  type InsertTimeLog,
+  type TimeLogSummary,
+  type InsertTimeLogSummary,
   type UserStats,
   type InsertUserStats
 } from "@shared/schema";
@@ -61,6 +67,15 @@ export interface IStorage {
   saveMoodAnalysis(analysis: InsertMoodAnalysis & { userId: number }): Promise<MoodAnalysis>;
   getMoodAnalysis(userId: number, date: string): Promise<MoodAnalysis | undefined>;
   getMoodAnalysisHistory(userId: number, limit?: number): Promise<MoodAnalysis[]>;
+  
+  saveTimeLogEntry(entry: InsertTimeLog & { userId: number }): Promise<TimeLog>;
+  getTimeLogEntries(userId: number, date: string): Promise<TimeLog[]>;
+  updateTimeLogEntry(id: number, activity: string): Promise<TimeLog | undefined>;
+  deleteTimeLogEntry(id: number): Promise<boolean>;
+  
+  saveTimeLogSummary(summary: InsertTimeLogSummary & { userId: number }): Promise<TimeLogSummary>;
+  getTimeLogSummary(userId: number, date: string): Promise<TimeLogSummary | undefined>;
+  getTimeLogSummaryHistory(userId: number, limit?: number): Promise<TimeLogSummary[]>;
   
   getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(userId: number, stats: Partial<UserStats>): Promise<UserStats>;
