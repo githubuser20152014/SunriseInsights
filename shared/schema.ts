@@ -98,6 +98,18 @@ export const userStats = pgTable("user_stats", {
   lastActiveDate: text("last_active_date"), // YYYY-MM-DD format
 });
 
+export const dailySummaries = pgTable("daily_summaries", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  summary: text("summary").notNull(),
+  highlights: text("highlights"),
+  moodTheme: text("mood_theme"),
+  productivityScore: integer("productivity_score"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -160,6 +172,13 @@ export const insertUserStatsSchema = createInsertSchema(userStats).omit({
   id: true,
 });
 
+export const insertDailySummarySchema = createInsertSchema(dailySummaries).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type VoiceRecording = typeof voiceRecordings.$inferSelect;
@@ -182,3 +201,5 @@ export type TimeLogSummary = typeof timeLogSummary.$inferSelect;
 export type InsertTimeLogSummary = z.infer<typeof insertTimeLogSummarySchema>;
 export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
+export type DailySummary = typeof dailySummaries.$inferSelect;
+export type InsertDailySummary = z.infer<typeof insertDailySummarySchema>;

@@ -10,6 +10,7 @@ import {
   timeLog,
   timeLogSummary,
   userStats,
+  dailySummaries,
   type User, 
   type InsertUser,
   type VoiceRecording,
@@ -31,7 +32,9 @@ import {
   type TimeLogSummary,
   type InsertTimeLogSummary,
   type UserStats,
-  type InsertUserStats
+  type InsertUserStats,
+  type DailySummary,
+  type InsertDailySummary
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
@@ -79,6 +82,10 @@ export interface IStorage {
   
   getUserStats(userId: number): Promise<UserStats | undefined>;
   updateUserStats(userId: number, stats: Partial<UserStats>): Promise<UserStats>;
+  
+  saveDailySummary(summary: InsertDailySummary & { userId: number }): Promise<DailySummary>;
+  getDailySummary(userId: number, date: string): Promise<DailySummary | undefined>;
+  getDailySummaryHistory(userId: number, limit?: number): Promise<DailySummary[]>;
 }
 
 export class MemStorage implements IStorage {
