@@ -38,16 +38,16 @@ export default function Home() {
   });
 
   return (
-    <div className="gradient-dawn min-h-screen relative overflow-hidden">
-      {/* Elegant background elements */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-amber-200/40 to-orange-200/40 rounded-full blur-3xl float-animation"></div>
-        <div className="absolute top-40 right-8 w-24 h-24 bg-gradient-to-br from-rose-200/40 to-pink-200/40 rounded-full blur-2xl float-animation" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-br from-violet-200/40 to-purple-200/40 rounded-full blur-2xl float-animation" style={{ animationDelay: '4s' }}></div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Elegant warm background elements */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-10 w-40 h-40 gradient-warm rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-8 w-32 h-32 gradient-forest rounded-full blur-2xl animate-float" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute bottom-32 left-1/4 w-24 h-24 gradient-sunrise rounded-full blur-2xl animate-float" style={{ animationDelay: '6s' }}></div>
       </div>
 
       {/* Header */}
-      <header className="glass-card sticky top-0 z-50 border-0 shadow-lg">
+      <header className="glass-card sticky top-0 z-50 border-0 hover-lift animate-soft-glow">
         <div className="max-w-md mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -67,22 +67,22 @@ export default function Home() {
         {/* Header Section - Full Width */}
         <div className="mb-8 space-y-6">
           {/* Location Status */}
-          <div className="glass-card rounded-3xl p-5 border-0 shadow-xl gentle-pulse">
+          <div className="glass-card rounded-3xl p-5 border-0 hover-lift animate-gentle-pulse">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 gradient-forest rounded-full flex items-center justify-center">
                   <i className="fas fa-map-marker-alt text-white text-xs"></i>
                 </div>
-                <span className="text-stone-700 font-medium">Alpharetta, GA</span>
+                <span className="text-foreground font-medium">Alpharetta, GA</span>
               </div>
-              <div className="text-stone-600 text-xs">
+              <div className="text-muted-foreground text-xs">
                 <div className="flex space-x-4">
                   <div className="flex items-center space-x-1">
-                    <i className="fas fa-sun text-amber-500 text-xs"></i>
+                    <i className="fas fa-sun text-gradient-sunrise text-xs"></i>
                     <span>{sunData?.sunrise?.formatted || "Loading..."}</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <i className="fas fa-moon text-indigo-500 text-xs"></i>
+                    <i className="fas fa-moon text-primary text-xs"></i>
                     <span>{sunData?.sunset?.formatted || "Loading..."}</span>
                   </div>
                 </div>
