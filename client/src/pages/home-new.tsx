@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { DailyMessage } from "@/components/daily-message";
-import { VoiceRecording } from "@/components/voice-recording";
-import { DailyTasks } from "@/components/daily-tasks";
-import { MoodSelector } from "@/components/mood-selector";
+import { VoiceRecording } from "@/components/voice-recording-styled";
+import { DailyTasks } from "@/components/daily-tasks-styled";
+import { MoodSelector } from "@/components/mood-selector-styled";
 import { MoodHistory } from "@/components/mood-history";
-import { DailyNotes } from "@/components/daily-notes";
-import { DailyGratitude } from "@/components/daily-gratitude";
+import { DailyNotes } from "@/components/daily-notes-styled";
+import { DailyGratitude } from "@/components/daily-gratitude-styled";
 import { DailyReflection } from "@/components/daily-reflection";
-import { ProgressStats } from "@/components/progress-stats";
-import { TimeTracker } from "@/components/time-tracker";
+import { ProgressStats } from "@/components/progress-stats-styled";
+import { TimeTracker } from "@/components/time-tracker-styled";
 import { useDailyReset } from "@/hooks/use-daily-reset";
 
 interface SunData {
