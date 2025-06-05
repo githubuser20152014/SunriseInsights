@@ -150,21 +150,19 @@ export function DailyTasks() {
 
   if (isLoading) {
     return (
-      <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+      <Card className="glass-card rounded-2xl p-6 border-0 hover-lift">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-              <i className="fas fa-list-check text-purple-600 text-sm"></i>
+            <div className="w-8 h-8 gradient-forest rounded-full flex items-center justify-center animate-gentle-pulse">
+              <i className="fas fa-list-check text-white text-sm"></i>
             </div>
-            <h3 className="text-lg font-medium text-slate-800">Today's Focus</h3>
+            <h3 className="text-lg font-medium text-gradient-warm">Today's Focus</h3>
           </div>
-          <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Max 3 tasks</span>
+          <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">Max 3 tasks</span>
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse">
-              <div className="h-12 bg-slate-100 rounded-xl"></div>
-            </div>
+            <div key={i} className="skeleton rounded-xl h-12"></div>
           ))}
         </div>
       </Card>
@@ -172,15 +170,15 @@ export function DailyTasks() {
   }
 
   return (
-    <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+    <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-            <i className="fas fa-list-check text-purple-600 text-sm"></i>
+          <div className="w-8 h-8 gradient-forest rounded-full flex items-center justify-center animate-gentle-pulse">
+            <i className="fas fa-list-check text-white text-sm"></i>
           </div>
-          <h3 className="text-lg font-medium text-slate-800">Today's Focus</h3>
+          <h3 className="text-lg font-medium text-gradient-warm">Today's Focus</h3>
         </div>
-        <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
+        <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
           {tasks.length}/3 tasks
         </span>
       </div>
@@ -190,8 +188,8 @@ export function DailyTasks() {
         {sortedTasks.map((task, index) => (
           <div 
             key={task.id} 
-            className={`flex items-start space-x-3 p-3 bg-slate-50 rounded-xl transition-all duration-200 ${
-              draggedItem === task.id ? 'opacity-50 scale-95' : 'hover:bg-slate-100'
+            className={`flex items-start space-x-3 p-3 bg-secondary/50 rounded-xl transition-all-smooth hover-lift ${
+              draggedItem === task.id ? 'opacity-50 scale-95' : 'hover:bg-secondary/70'
             } ${!task.completed ? 'cursor-move' : ''}`}
             draggable={!task.completed}
             onDragStart={(e) => !task.completed && handleDragStart(e, task.id)}

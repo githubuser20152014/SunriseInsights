@@ -89,10 +89,10 @@ export function MoodSelector() {
   };
 
   return (
-    <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+    <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-slate-800">How are you feeling?</h3>
-        <span className="text-sm text-slate-500">Track your mood</span>
+        <h3 className="text-lg font-semibold text-gradient-warm">How are you feeling?</h3>
+        <span className="text-sm text-muted-foreground">Track your mood</span>
       </div>
       
       {!showNoteInput ? (
@@ -101,13 +101,13 @@ export function MoodSelector() {
             <button
               key={mood.mood}
               onClick={() => handleMoodSelect(mood)}
-              className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 transition-all duration-300 border border-slate-200 hover:border-slate-300 min-h-[4rem] sm:min-h-[5rem]"
+              className={`group relative p-3 sm:p-4 rounded-xl btn-glass hover-lift transition-all-smooth border border-white/20 min-h-[4rem] sm:min-h-[5rem] mood-${mood.mood}`}
             >
               <div className="text-center space-y-2">
-                <div className="text-2xl transform group-hover:scale-110 transition-transform duration-300">
+                <div className="text-2xl transform group-hover:scale-110 transition-transform duration-300 animate-gentle-pulse">
                   {mood.emoji}
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-slate-600 capitalize">
+                <div className="text-xs sm:text-sm font-medium text-foreground capitalize">
                   {mood.mood}
                 </div>
               </div>

@@ -33,9 +33,9 @@ export function DailyMessage() {
   }
 
   return (
-    <Card className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-2xl p-6 text-white shadow-lg">
+    <Card className="glass-card gradient-sunrise rounded-2xl p-6 text-white border-0 hover-lift animate-soft-glow">
       <div className="flex items-start space-x-3">
-        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1 animate-gentle-pulse">
           <i className="fas fa-quote-left text-lg"></i>
         </div>
         <div className="flex-1">
@@ -44,7 +44,7 @@ export function DailyMessage() {
             {message?.text || "Loading your daily inspiration..."}
           </p>
           {message?.author && (
-            <div className="text-xs text-white/70 mt-3">
+            <div className="text-xs text-white/70 mt-3 font-medium">
               — {message.author}
             </div>
           )}
