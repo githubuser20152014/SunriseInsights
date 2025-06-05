@@ -7,7 +7,7 @@ import { MoodHistory } from "@/components/mood-history";
 import { DailyNotes } from "@/components/daily-notes";
 import { DailyGratitude } from "@/components/daily-gratitude";
 import { DailyReflection } from "@/components/daily-reflection";
-import { ProgressStats } from "@/components/progress-stats";
+
 import { TimeTracker } from "@/components/time-tracker";
 import { DailySummary } from "@/components/daily-summary";
 import { useDailyReset } from "@/hooks/use-daily-reset";
@@ -166,11 +166,6 @@ export default function Home() {
         {/* End of Day Reflection */}
         <div className="mb-8">
           <DailyReflection />
-        </div>
-
-        {/* Progress Stats */}
-        <div className="mb-8">
-          <ProgressStats />
         </div>
 
         {/* Today's Summary */}
