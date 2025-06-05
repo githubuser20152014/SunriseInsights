@@ -129,11 +129,11 @@
 /* Gradient backgrounds */
 .gradient-sunrise {
   background: linear-gradient(135deg, 
-    #FFF7ED 0%, 
-    #FFEDD5 25%, 
-    #FED7AA 50%, 
+    #EA580C 0%, 
+    #F97316 25%, 
+    #FB923C 50%, 
     #FDBA74 75%, 
-    #FB923C 100%);
+    #EA580C 100%);
 }
 
 .gradient-forest {

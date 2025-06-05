@@ -36,15 +36,15 @@ export function DailyMessage() {
     <Card className="glass-card gradient-sunrise rounded-2xl p-6 border-0 hover-lift animate-soft-glow">
       <div className="flex items-start space-x-3">
         <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1 animate-gentle-pulse">
-          <i className="fas fa-quote-left text-lg text-white"></i>
+          <i className="fas fa-quote-left text-lg text-white drop-shadow-sm"></i>
         </div>
         <div className="flex-1">
-          <h2 className="text-lg font-medium mb-2 text-white">Today's Inspiration</h2>
-          <p className="text-white leading-relaxed font-medium">
+          <h2 className="text-lg font-medium mb-2 text-white drop-shadow-sm">Today's Inspiration</h2>
+          <p className="text-white leading-relaxed font-medium drop-shadow-sm">
             {message?.text || "Loading your daily inspiration..."}
           </p>
           {message?.author && (
-            <div className="text-xs text-white/80 mt-3 font-medium">
+            <div className="text-xs text-white/90 mt-3 font-medium drop-shadow-sm">
               — {message.author}
             </div>
           )}
