@@ -107,18 +107,13 @@ export function DailySummary() {
   };
 
   return (
-    <Card className="glass-card rounded-3xl p-6 border-0 hover-lift animate-gentle-pulse">
-      <CardHeader className="pb-4">
+    <Card className="border-0 shadow-none bg-transparent">
+      <CardHeader className="pb-6 px-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 gradient-sunset rounded-2xl flex items-center justify-center soft-glow">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
+            <div className="w-10 h-10 rounded-full bg-emerald-100"></div>
             <div>
-              <CardTitle className="text-xl font-medium text-gradient-warm">Today's Summary</CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                AI-powered insights from your daily activities
-              </CardDescription>
+              <CardTitle className="text-xl font-medium text-gray-800">Today's Summary</CardTitle>
             </div>
           </div>
           
@@ -144,7 +139,7 @@ export function DailySummary() {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-0">
         {isLoading && (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
