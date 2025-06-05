@@ -240,20 +240,33 @@ export function TimeTracker() {
 
       {/* Time Slots Grid */}
       <div className="space-y-1 max-h-96 overflow-y-auto">
-        {timeSlots.map((timeSlot) => {
+        {timeSlots.map((timeSlot, index) => {
           const entry = getEntryForSlot(timeSlot);
           const isEditing = editingSlot === timeSlot;
+          const isHourStart = timeSlot.endsWith(':00');
+          const showHourDivider = isHourStart && index > 0;
 
           return (
-            <div
-              key={timeSlot}
-              className="flex items-center space-x-3 p-2 hover:bg-slate-50 rounded-lg transition-colors"
-            >
-              <div className="w-20 text-sm font-medium text-slate-600 flex-shrink-0">
-                {formatTimeSlot(timeSlot)}
-              </div>
+            <div key={timeSlot}>
+              {/* Hour Divider */}
+              {showHourDivider && (
+                <div className="flex items-center my-3">
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                  <div className="mx-3 text-xs font-medium text-slate-400 bg-white px-2">
+                    {formatTimeSlot(timeSlot).split(':')[0] + (formatTimeSlot(timeSlot).includes('PM') ? ' PM' : ' AM')}
+                  </div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                </div>
+              )}
               
-              <div className="flex-1">
+              <div
+                className="flex items-center space-x-3 p-2 hover:bg-slate-50 rounded-lg transition-colors"
+              >
+                <div className="w-20 text-sm font-medium text-slate-600 flex-shrink-0">
+                  {formatTimeSlot(timeSlot)}
+                </div>
+                
+                <div className="flex-1">
                 {isEditing ? (
                   <div className="flex items-center space-x-2">
                     <Input
@@ -317,6 +330,7 @@ export function TimeTracker() {
                     Click to add activity...
                   </button>
                 )}
+                </div>
               </div>
             </div>
           );
