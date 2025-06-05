@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface MoodEntry {
   id: number;
@@ -26,6 +27,7 @@ export function MoodHistory() {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<string>("");
   const [showPastAnalyses, setShowPastAnalyses] = useState(false);
+  const [showMoodInsights, setShowMoodInsights] = useState(true);
 
   // Get today's date in Eastern Time
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
@@ -146,7 +148,21 @@ export function MoodHistory() {
       {todayEntries.length >= 2 && (
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="flex items-center justify-between mb-3">
-            <h5 className="text-sm font-medium text-slate-700">AI Mood Insights</h5>
+            <div className="flex items-center space-x-2">
+              <h5 className="text-sm font-medium text-slate-700">AI Mood Insights</h5>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMoodInsights(!showMoodInsights)}
+                className="h-auto p-1 text-slate-600 hover:text-slate-800"
+              >
+                {showMoodInsights ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
             <div className="flex gap-2">
               {(pastAnalyses && pastAnalyses.length > 0) && (
                 <Button
@@ -180,28 +196,32 @@ export function MoodHistory() {
             </div>
           </div>
           
-          {/* Show today's analysis if it exists */}
-          {todaysAnalysis && (
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200 mb-4">
-              <div className="flex items-start space-x-2">
-                <i className="fas fa-lightbulb text-purple-600 text-sm mt-0.5"></i>
-                <div className="text-sm text-slate-700 leading-relaxed">
-                  {todaysAnalysis.analysis}
+          {showMoodInsights && (
+            <>
+              {/* Show today's analysis if it exists */}
+              {todaysAnalysis && (
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200 mb-4">
+                  <div className="flex items-start space-x-2">
+                    <i className="fas fa-lightbulb text-purple-600 text-sm mt-0.5"></i>
+                    <div className="text-sm text-slate-700 leading-relaxed">
+                      {todaysAnalysis.analysis}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Show newly generated analysis */}
-          {showAnalysis && analysis && !todaysAnalysis && (
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200 mb-4">
-              <div className="flex items-start space-x-2">
-                <i className="fas fa-lightbulb text-purple-600 text-sm mt-0.5"></i>
-                <div className="text-sm text-slate-700 leading-relaxed">
-                  {analysis}
+              )}
+              
+              {/* Show newly generated analysis */}
+              {showAnalysis && analysis && !todaysAnalysis && (
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200 mb-4">
+                  <div className="flex items-start space-x-2">
+                    <i className="fas fa-lightbulb text-purple-600 text-sm mt-0.5"></i>
+                    <div className="text-sm text-slate-700 leading-relaxed">
+                      {analysis}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              )}
+            </>
           )}
 
           {/* Past analyses dropdown */}

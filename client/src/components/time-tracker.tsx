@@ -33,6 +33,7 @@ export function TimeTracker() {
   const [editingSlot, setEditingSlot] = useState<string | null>(null);
   const [editingActivity, setEditingActivity] = useState("");
   const [showPastSummaries, setShowPastSummaries] = useState(false);
+  const [showTodaySummary, setShowTodaySummary] = useState(true);
   const [isGeneratingAISummary, setIsGeneratingAISummary] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -227,14 +228,32 @@ export function TimeTracker() {
       {/* Today's Summary */}
       {summary && (
         <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
-          <div className="flex items-center space-x-2 mb-2">
-            <Sparkles className="w-4 h-4 text-purple-600" />
-            <span className="text-sm font-medium text-purple-800">Today's Summary</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              <span className="text-sm font-medium text-purple-800">Today's Summary</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowTodaySummary(!showTodaySummary)}
+              className="h-auto p-1 text-purple-600 hover:text-purple-800"
+            >
+              {showTodaySummary ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </Button>
           </div>
-          <p className="text-sm text-slate-700">{summary.summary}</p>
-          <p className="text-xs text-slate-500 mt-1">
-            Based on {summary.totalEntries} time entries
-          </p>
+          {showTodaySummary && (
+            <div className="mt-2">
+              <p className="text-sm text-slate-700">{summary.summary}</p>
+              <p className="text-xs text-slate-500 mt-1">
+                Based on {summary.totalEntries} time entries
+              </p>
+            </div>
+          )}
         </div>
       )}
 
