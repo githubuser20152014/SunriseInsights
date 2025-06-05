@@ -121,11 +121,11 @@ export default function Home() {
               <div className="text-muted-foreground text-xs text-right">
                 <div className="flex justify-end space-x-4">
                   <div className="flex items-center space-x-1">
-                    <i className="fas fa-sun text-gradient-sunrise text-xs"></i>
+                    <i className="fas fa-sun text-yellow-500 text-xs"></i>
                     <span>{sunData?.sunrise?.formatted || "Loading..."}</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <i className="fas fa-moon text-primary text-xs"></i>
+                    <i className="fas fa-moon text-blue-400 text-xs"></i>
                     <span>{sunData?.sunset?.formatted || "Loading..."}</span>
                   </div>
                 </div>
