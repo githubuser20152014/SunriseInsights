@@ -259,16 +259,10 @@ export function DailySummary() {
         
         <Collapsible open={showHistory} onOpenChange={setShowHistory}>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="w-full justify-between p-0 h-auto font-normal">
-              <div className="flex items-center space-x-2">
-                <History className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Previous Summaries</span>
-              </div>
-              {showHistory ? (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              )}
+            <Button variant="ghost" className="p-0 h-auto font-normal hover:bg-transparent">
+              <span className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                View Past Summaries ({historySummaries?.filter(h => h.date !== today).length || 0})
+              </span>
             </Button>
           </CollapsibleTrigger>
           
