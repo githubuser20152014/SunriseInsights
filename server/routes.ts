@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney, summarizeTimeLog } from "./lib/openai";
+import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney, summarizeTimeLog, generateDailySummary } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
 import { getWeatherForAlpharetta } from "./lib/weather";
 import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema, insertMoodAnalysisSchema, insertTimeLogSchema, insertTimeLogSummarySchema } from "@shared/schema";
@@ -629,6 +629,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(summaries);
     } catch (error) {
       res.status(500).json({ message: "Failed to get time log summary history" });
+    }
+  });
+
+  // Generate comprehensive daily summary
+  app.post("/api/generate-daily-summary", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const { date } = req.body;
+      
+      if (!date) {
+        return res.status(400).json({ message: "Date is required" });
+      }
+      
+      // Collect all data for the day
+      const [
+        voiceRecordings,
+        dailyNotes,
+        dailyGratitude,
+        moods,
+        dailyReflections,
+        dailyTasks,
+        timeLogEntries
+      ] = await Promise.all([
+        storage.getVoiceRecordings(userId, 10),
+        storage.getDailyNotes(userId, date),
+        storage.getDailyGratitude(userId, date),
+        storage.getMoods(userId, 20),
+        storage.getDailyReflections(userId, 10),
+        storage.getDailyTasks(userId, date),
+        storage.getTimeLogEntries(userId, date)
+      ]);
+
+      // Filter data for the specific date
+      const todayMoods = moods.filter(mood => mood.timestamp.startsWith(date));
+      const todayReflections = dailyReflections.filter(reflection => 
+        reflection.recordedAt.startsWith(date)
+      );
+      const todayVoiceRecordings = voiceRecordings.filter(recording => 
+        recording.recordedAt.startsWith(date)
+      );
+
+      // Prepare data for AI analysis
+      const dailyData = {
+        brainDump: todayVoiceRecordings.map(r => r.transcript).join(' '),
+        notes: dailyNotes?.content || '',
+        gratitude: dailyGratitude?.content || '',
+        moods: todayMoods.map(mood => ({
+          mood: mood.mood,
+          emoji: mood.emoji,
+          note: mood.note || '',
+          timestamp: mood.timestamp
+        })),
+        reflection: todayReflections.map(r => r.transcript).join(' '),
+        tasks: dailyTasks.map(task => ({
+          text: task.text,
+          completed: task.completed
+        })),
+        timeLog: timeLogEntries.map(entry => ({
+          timeSlot: entry.timeSlot,
+          activity: entry.activity
+        }))
+      };
+
+      // Generate AI summary
+      const summaryData = await generateDailySummary(dailyData);
+      
+      // Save the summary
+      const savedSummary = await storage.saveDailySummary({
+        date,
+        summary: summaryData.summary,
+        highlights: summaryData.highlights,
+        moodTheme: summaryData.moodTheme,
+        productivityScore: summaryData.productivityScore,
+        userId
+      });
+      
+      res.json(savedSummary);
+    } catch (error) {
+      console.error("Error generating daily summary:", error);
+      res.status(500).json({ message: "Failed to generate daily summary" });
+    }
+  });
+
+  // Get daily summary
+  app.get("/api/daily-summary", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ message: "Date parameter is required" });
+      }
+      
+      const summary = await storage.getDailySummary(userId, date);
+      res.json(summary);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get daily summary" });
+    }
+  });
+
+  // Get daily summary history
+  app.get("/api/daily-summary-history", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 7;
+      
+      const summaries = await storage.getDailySummaryHistory(userId, limit);
+      res.json(summaries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get daily summary history" });
     }
   });
 

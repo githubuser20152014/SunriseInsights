@@ -189,3 +189,74 @@ export async function summarizeTimeLog(timeEntries: Array<{ timeSlot: string; ac
     throw new Error("Failed to generate time log summary");
   }
 }
+
+export async function generateDailySummary(dailyData: {
+  brainDump?: string;
+  notes?: string;
+  gratitude?: string;
+  moods?: Array<{ mood: string; emoji: string; note?: string; timestamp: string }>;
+  reflection?: string;
+  tasks?: Array<{ text: string; completed: boolean }>;
+  timeLog?: Array<{ timeSlot: string; activity: string }>;
+}): Promise<{
+  summary: string;
+  highlights: string;
+  moodTheme: string;
+  productivityScore: number;
+}> {
+  try {
+    const completedTasks = dailyData.tasks?.filter(task => task.completed) || [];
+    const totalTasks = dailyData.tasks?.length || 0;
+    const moodSummary = dailyData.moods?.map(m => `${m.mood} ${m.emoji} ${m.note || ''}`).join(', ') || 'No mood entries';
+    
+    const prompt = `Analyze this person's complete day and create a comprehensive summary:
+
+BRAIN DUMP/THOUGHTS: ${dailyData.brainDump || 'None recorded'}
+
+DAILY NOTES: ${dailyData.notes || 'None recorded'}
+
+GRATITUDE JOURNAL: ${dailyData.gratitude || 'None recorded'}
+
+MOOD JOURNEY: ${moodSummary}
+
+END OF DAY REFLECTION: ${dailyData.reflection || 'None recorded'}
+
+TASKS: ${totalTasks > 0 ? `${completedTasks.length}/${totalTasks} completed` : 'No tasks recorded'}
+
+TIME LOG: ${dailyData.timeLog?.map(t => `${t.timeSlot}: ${t.activity}`).join(', ') || 'No time log'}
+
+Create a JSON response with:
+- summary: A thoughtful 2-3 paragraph summary of how their day went
+- highlights: Key positive moments and achievements (bullet points)
+- moodTheme: Overall mood theme for the day (one phrase)
+- productivityScore: Score 1-10 based on task completion and time usage`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert life coach and wellness analyst. Analyze daily activities with empathy and insight, focusing on growth and positive reinforcement."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 500,
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    return {
+      summary: result.summary || "No summary available",
+      highlights: result.highlights || "No highlights identified",
+      moodTheme: result.moodTheme || "Neutral",
+      productivityScore: Math.max(1, Math.min(10, parseInt(result.productivityScore) || 5))
+    };
+  } catch (error) {
+    console.error("Failed to generate daily summary:", error);
+    throw new Error("Failed to generate daily summary");
+  }
+}

@@ -713,6 +713,57 @@ export class DatabaseStorage implements IStorage {
       .orderBy(sql`${timeLogSummary.date} DESC`)
       .limit(limit);
   }
+
+  async saveDailySummary(summary: InsertDailySummary & { userId: number }): Promise<DailySummary> {
+    // Check if summary exists for this user and date
+    const [existingSummary] = await db
+      .select()
+      .from(dailySummaries)
+      .where(and(
+        eq(dailySummaries.userId, summary.userId),
+        eq(dailySummaries.date, summary.date)
+      ));
+
+    if (existingSummary) {
+      // Update existing summary
+      const [updatedSummary] = await db
+        .update(dailySummaries)
+        .set({ 
+          summary: summary.summary,
+          highlights: summary.highlights,
+          moodTheme: summary.moodTheme,
+          productivityScore: summary.productivityScore,
+          updatedAt: sql`now()`
+        })
+        .where(eq(dailySummaries.id, existingSummary.id))
+        .returning();
+      return updatedSummary;
+    } else {
+      // Create new summary
+      const [newSummary] = await db
+        .insert(dailySummaries)
+        .values(summary)
+        .returning();
+      return newSummary;
+    }
+  }
+
+  async getDailySummary(userId: number, date: string): Promise<DailySummary | undefined> {
+    const [summary] = await db
+      .select()
+      .from(dailySummaries)
+      .where(and(eq(dailySummaries.userId, userId), eq(dailySummaries.date, date)));
+    return summary || undefined;
+  }
+
+  async getDailySummaryHistory(userId: number, limit = 10): Promise<DailySummary[]> {
+    return await db
+      .select()
+      .from(dailySummaries)
+      .where(eq(dailySummaries.userId, userId))
+      .orderBy(sql`${dailySummaries.date} DESC`)
+      .limit(limit);
+  }
 }
 
 export const storage = new DatabaseStorage();
