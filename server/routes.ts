@@ -57,7 +57,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         summary = await summarizeThoughts(transcript);
       } catch (aiError) {
-        console.warn("AI summary failed, storing without summary:", aiError.message);
+        console.warn("AI summary failed, storing without summary:", aiError instanceof Error ? aiError.message : String(aiError));
         // Continue without summary - the recording will still be saved
       }
 

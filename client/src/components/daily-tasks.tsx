@@ -126,22 +126,9 @@ export function DailyTasks() {
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
-    
-    if (draggedItem === null) return;
-    
-    const dragIndex = sortedTasks.findIndex(task => task.id === draggedItem);
-    if (dragIndex === dropIndex) return;
-    
-    const newTasks = [...sortedTasks];
-    const draggedTask = newTasks[dragIndex];
-    
-    // Remove from old position
-    newTasks.splice(dragIndex, 1);
-    // Insert at new position
-    newTasks.splice(dropIndex, 0, draggedTask);
-    
-    setSortedTasks(newTasks);
     setDraggedItem(null);
+    // Note: Drag and drop reordering would require backend support for task ordering
+    // For now, we'll just clear the drag state
   };
 
   const handleDragEnd = () => {
