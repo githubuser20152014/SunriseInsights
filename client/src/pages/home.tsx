@@ -173,6 +173,15 @@ export default function Home() {
           <DailySummary />
         </div>
 
+        {/* End of App Marker */}
+        <div className="flex flex-col items-center py-12 text-center">
+          <div className="w-16 h-px bg-gradient-to-r from-transparent via-border to-transparent mb-4"></div>
+          <div className="text-xs text-muted-foreground/60 font-light tracking-wider">
+            End of Daily Wellness
+          </div>
+          <div className="w-16 h-px bg-gradient-to-r from-transparent via-border to-transparent mt-4"></div>
+        </div>
+
         {/* Bottom padding for elegant spacing */}
         <div className="h-8"></div>
       </main>
