@@ -659,19 +659,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async saveTimeLogSummary(summary: InsertTimeLogSummary & { userId: number }): Promise<TimeLogSummary> {
-    const [timeLogSummaryEntry] = await db
-      .insert(timeLogSummary)
-      .values(summary)
-      .onConflictDoUpdate({
-        target: [timeLogSummary.userId, timeLogSummary.date],
-        set: {
-          summary: sql`excluded.summary`,
-          totalEntries: sql`excluded.total_entries`,
+    // Check if summary exists for this user and date
+    const [existingSummary] = await db
+      .select()
+      .from(timeLogSummary)
+      .where(and(
+        eq(timeLogSummary.userId, summary.userId),
+        eq(timeLogSummary.date, summary.date)
+      ));
+
+    if (existingSummary) {
+      // Update existing summary
+      const [updatedSummary] = await db
+        .update(timeLogSummary)
+        .set({ 
+          summary: summary.summary,
+          totalEntries: summary.totalEntries,
           createdAt: sql`now()`
-        }
-      })
-      .returning();
-    return timeLogSummaryEntry;
+        })
+        .where(eq(timeLogSummary.id, existingSummary.id))
+        .returning();
+      return updatedSummary;
+    } else {
+      // Create new summary
+      const [newSummary] = await db
+        .insert(timeLogSummary)
+        .values(summary)
+        .returning();
+      return newSummary;
+    }
   }
 
   async getTimeLogSummary(userId: number, date: string): Promise<TimeLogSummary | undefined> {
