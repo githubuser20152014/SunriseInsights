@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,6 @@ interface DailyTask {
 
 export function DailyTasks() {
   const [newTaskText, setNewTaskText] = useState("");
-  const [sortedTasks, setSortedTasks] = useState<DailyTask[]>([]);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -26,14 +25,13 @@ export function DailyTasks() {
   });
 
   // Sort tasks: incomplete first, then completed at bottom
-  useEffect(() => {
-    const sorted = [...tasks].sort((a, b) => {
+  const sortedTasks = useMemo(() => {
+    return [...tasks].sort((a, b) => {
       if (a.completed === b.completed) {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
       return a.completed ? 1 : -1;
     });
-    setSortedTasks(sorted);
   }, [tasks]);
 
   const createTaskMutation = useMutation({
