@@ -107,8 +107,8 @@ export function DailySummary() {
   };
 
   return (
-    <Card className="border-0 shadow-none bg-transparent">
-      <CardHeader className="pb-6 px-0">
+    <Card className="glass-card rounded-3xl p-6 border-0 hover-lift animate-gentle-pulse">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full bg-emerald-100"></div>
@@ -139,7 +139,7 @@ export function DailySummary() {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6 px-0">
+      <CardContent className="space-y-6">
         {isLoading && (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
