@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Journal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .date-time {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .greeting {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+
+        .inspiration {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .inspiration blockquote {
+            font-style: italic;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .inspiration cite {
+            font-size: 14px;
+            opacity: 0.8;
+            color: white;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-left: auto;
+        }
+
+        .brain-dump textarea {
+            width: 100%;
+            min-height: 120px;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: vertical;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .tasks-section {
+            margin-bottom: 20px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-right: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .task-checkbox.checked {
+            background: #667eea;
+            border-color: #667eea;
+            position: relative;
+        }
+
+        .task-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: -2px;
+            left: 3px;
+            font-size: 14px;
+        }
+
+        .task-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 5px;
+        }
+
+        .add-task {
+            color: #667eea;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .add-task:hover {
+            opacity: 0.7;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mood-item {
+            text-align: center;
+            padding: 15px 10px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mood-item:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .mood-item.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .mood-emoji {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .mood-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+
+
+        .gratitude-list {
+            list-style: none;
+        }
+
+        .gratitude-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff8e1;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .gratitude-emoji {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .gratitude-text {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .time-tracking-section {
+            margin-bottom: 30px;
+        }
+
+        .time-entries {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .time-entry {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #667eea;
+        }
+
+        .time-entry-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .time-slot {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .time-duration {
+            font-size: 12px;
+            color: #666;
+            background: #f0f2ff;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .time-activity {
+            color: #333;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .time-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .time-summary h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .time-summary p {
+            line-height: 1.6;
+            opacity: 0.95;
+            font-size: 14px;
+        }
+
+        .reflection-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .reflection-textarea {
+            width: 100%;
+            min-height: 150px;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .past-reflections {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .past-reflection-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .reflection-date {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .reflection-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .notes-area {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 200px;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: none;
+        }
+
+        .progress-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .floating-reflection {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .floating-reflection:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .main-grid,
+            .bottom-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .time-entries {
+                grid-template-columns: 1fr;
+            }
+            
+            .mood-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="date-time">Thursday, June 5, 2025 • 2:10 PM • Alpharetta, GA</div>
+            <h1 class="greeting">Good afternoon! ✨</h1>
+        </header>
+
+        <!-- Daily Inspiration -->
+        <section class="inspiration">
+            <blockquote>
+                "Every sunrise brings a new chance to grow beyond yesterday's limits. Embrace today's challenges with courage, for they are the stepping stones to your greatest achievements."
+            </blockquote>
+            <cite>— Lillian Voss</cite>
+        </section>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Brain Dump -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">🧠</span>
+                    <h2 class="card-title">Brain Dump</h2>
+                </div>
+                <div class="brain-dump">
+                    <textarea placeholder="Let your thoughts flow freely here..." style="background: transparent; border: 1px solid #e0e0e0;">so thankful, I had a good night's sleep. I did not check my phone, I was not listening to podcast at night. I don't have the throbbing headache in the morning. I am energized and I feel great this morning 🙏
+
+made $220 in profit this morning with futures</textarea>
+                </div>
+            </div>
+
+            <!-- Today's Focus -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">🎯</span>
+                    <h2 class="card-title">Today's Focus</h2>
+                    <span class="card-subtitle">0/3 tasks</span>
+                </div>
+                <div class="tasks-section">
+                    <div class="task-item">
+                        <div class="task-checkbox"></div>
+                        <input type="text" class="task-input" placeholder="Add your first priority for today...">
+                    </div>
+                    <div class="task-item">
+                        <div class="task-checkbox"></div>
+                        <input type="text" class="task-input" placeholder="What's your second goal?">
+                    </div>
+                    <div class="task-item">
+                        <div class="task-checkbox"></div>
+                        <input type="text" class="task-input" placeholder="And your third focus area?">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mood Tracker -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">😊</span>
+                    <h2 class="card-title">How are you feeling?</h2>
+                </div>
+                <div class="mood-grid">
+                    <div class="mood-item selected">
+                        <div class="mood-emoji">🙏</div>
+                        <div class="mood-label">Grateful</div>
+                    </div>
+                    <div class="mood-item">
+                        <div class="mood-emoji">⚡</div>
+                        <div class="mood-label">Energized</div>
+                    </div>
+                    <div class="mood-item">
+                        <div class="mood-emoji">😌</div>
+                        <div class="mood-label">Calm</div>
+                    </div>
+                    <div class="mood-item">
+                        <div class="mood-emoji">🔥</div>
+                        <div class="mood-label">Motivated</div>
+                    </div>
+                    <div class="mood-item">
+                        <div class="mood-emoji">🤔</div>
+                        <div class="mood-label">Reflective</div>
+                    </div>
+                    <div class="mood-item">
+                        <div class="mood-emoji">🎉</div>
+                        <div class="mood-label">Excited</div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- Time Tracking Section -->
+        <section class="time-tracking-section">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">⏰</span>
+                    <h2 class="card-title">Time Tracker</h2>
+                    <span class="card-subtitle">9 entries</span>
+                </div>
+                
+                <div class="time-entries">
+                    <div class="time-entry">
+                        <div class="time-entry-header">
+                            <span class="time-slot">6:30 AM</span>
+                            <span class="time-duration">30 min</span>
+                        </div>
+                        <div class="time-activity">Market prep for trading</div>
+                    </div>
+                    
+                    <div class="time-entry">
+                        <div class="time-entry-header">
+                            <span class="time-slot">7:00 - 8:30 AM</span>
+                            <span class="time-duration">1.5 hrs</span>
+                        </div>
+                        <div class="time-activity">Ross live trading session</div>
+                    </div>
+                    
+                    <div class="time-entry">
+                        <div class="time-entry-header">
+                            <span class="time-slot">9:00 AM</span>
+                            <span class="time-duration">15 min</span>
+                        </div>
+                        <div class="time-activity">Conversation with Sai</div>
+                    </div>
+                    
+                    <div class="time-entry">
+                        <div class="time-entry-header">
+                            <span class="time-slot">11:00 - 11:30 AM</span>
+                            <span class="time-duration">30 min</span>
+                        </div>
+                        <div class="time-activity">Trading course study</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="time-summary">
+                <h3>✨ Today's Summary</h3>
+                <p>Based on the time log, my day began early with a focus on market preparation for trading at 6:30 AM, demonstrating a proactive approach to my work. I dedicated a substantial block of time, from 7:00 AM to 8:30 AM, to participating in a live trading session with Ross. This indicates a strong commitment to actively engaging in professional development and potentially making real-time trading decisions. Following the live session, I had a conversation with Sai at 9:00 AM, which could be an opportunity for networking or discussing trading strategies. At 11:00 AM, I shifted my focus to a trading course, continuing my professional development.</p>
+            </div>
+        </section>
+
+        <!-- Bottom Section -->
+        <div class="bottom-section">
+            <!-- Daily Notes -->
+            <div class="notes-area">
+                <div class="card-header">
+                    <span class="card-icon">📝</span>
+                    <h2 class="card-title">Daily Notes</h2>
+                    <span class="card-subtitle">Capture your thoughts</span>
+                </div>
+                <textarea class="notes-textarea" placeholder="What's on your mind today? Jot down ideas, observations, or anything worth remembering..."></textarea>
+            </div>
+
+            <!-- Progress & Gratitude -->
+            <div class="card progress-card">
+                <div>
+                    <div class="card-header">
+                        <span class="card-icon">🌟</span>
+                        <h2 class="card-title">Today's Gratitude</h2>
+                    </div>
+                    <ul class="gratitude-list">
+                        <li class="gratitude-item">
+                            <span class="gratitude-emoji">😴</span>
+                            <span class="gratitude-text">Great night's sleep without phone distractions</span>
+                        </li>
+                        <li class="gratitude-item">
+                            <span class="gratitude-emoji">💰</span>
+                            <span class="gratitude-text">$220 profit from trading this morning</span>
+                        </li>
+                        <li class="gratitude-item">
+                            <span class="gratitude-emoji">⚡</span>
+                            <span class="gratitude-text">Feeling energized and headache-free</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="progress-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Entries</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">9</div>
+                        <div class="stat-label">Moods</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- End of Day Reflection -->
+        <section class="reflection-section">
+            <div class="card-header">
+                <span class="card-icon">🌙</span>
+                <h2 class="card-title">End of Day Reflection</h2>
+                <span class="card-subtitle">Share how your day went</span>
+            </div>
+            
+            <textarea class="reflection-textarea" placeholder="How did your day go? What went well? What could be improved? What are you grateful for?"></textarea>
+            
+            <div class="past-reflections">
+                <h4 style="margin-bottom: 15px; color: #666; font-size: 14px;">📖 Past Reflections (2)</h4>
+                
+                <div class="past-reflection-item">
+                    <div class="reflection-date">Tue, Jun 3, 10:25 PM</div>
+                    <div class="reflection-text">
+                        It's about 10:30 PM. I am ready to crash. It's been a long day. Did not get a good night sleep yesterday. Woke up around 2 o'clock 2 AM and then was not able to sleep very well and then today spent the whole day so I was tired all day but somehow got through it. I made some good money in future studying. I'm thinking if I can make $150 per day on an average that will give me 750 for the week and $3000 for the month. That would be really good. That will keep me afloat so I made $150 today and I came up on the strategy of first getting two basic hits and then looking for the third one later on so this is straight out of text textbook from Ross so anyway in the afternoon, I took Sameer to see his doctor for his shoulder injury, then I came home and crashed. I still feel kind of really sleepy so I'm gonna have dinner. I mean, I already had dinner and now I'm going to crash or all it has been a good day. I'm grateful for the money I made.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Floating Add Time Entry Button -->
+    <button class="floating-reflection" title="Add Time Entry" style="background: #28a745;">⏱️</button>
+
+    <script>
+        // Task functionality
+        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('click', function() {
+                this.classList.toggle('checked');
+                updateTaskCounter();
+            });
+        });
+
+        function updateTaskCounter() {
+            const checked = document.querySelectorAll('.task-checkbox.checked').length;
+            const total = document.querySelectorAll('.task-checkbox').length;
+            document.querySelector('.card-subtitle').textContent = `${checked}/${total} tasks`;
+        }
+
+        // Mood selection
+        document.querySelectorAll('.mood-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.mood-item').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Floating add time entry button
+        document.querySelector('.floating-reflection').addEventListener('click', function() {
+            const timeSlot = prompt('What time? (e.g., "2:00 PM" or "2:00 - 3:00 PM")');
+            const activity = prompt('What activity?');
+            
+            if (timeSlot && activity) {
+                const timeEntry = document.createElement('div');
+                timeEntry.className = 'time-entry';
+                timeEntry.innerHTML = `
+                    <div class="time-entry-header">
+                        <span class="time-slot">${timeSlot}</span>
+                        <span class="time-duration">Manual</span>
+                    </div>
+                    <div class="time-activity">${activity}</div>
+                `;
+                document.querySelector('.time-entries').appendChild(timeEntry);
+                
+                // Update entry counter
+                const entryCount = document.querySelectorAll('.time-entry').length;
+                document.querySelector('.time-tracking-section .card-subtitle').textContent = `${entryCount} entries`;
+            }
+        });
+    </script>
+</body>
+</html>
