@@ -102,14 +102,14 @@ export function DailyGratitude() {
   };
 
   return (
-    <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+    <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
       <div className="space-y-4 mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-              <i className="fas fa-heart text-amber-600 text-sm"></i>
+            <div className="w-8 h-8 gradient-sunrise rounded-full flex items-center justify-center animate-gentle-pulse">
+              <i className="fas fa-heart text-white text-sm"></i>
             </div>
-            <h3 className="text-lg font-medium text-slate-800">Today I am grateful for...</h3>
+            <h3 className="text-lg font-medium text-gradient-warm">Today I am grateful for...</h3>
           </div>
           <div className="flex items-center space-x-2">
             {pastGratitude && pastGratitude.length > 0 && (

@@ -117,8 +117,8 @@ export function MoodHistory() {
   }
 
   return (
-    <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-      <h4 className="text-lg font-semibold text-slate-800 mb-4">Today's Mood Journey</h4>
+    <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
+      <h4 className="text-lg font-semibold text-gradient-warm mb-4">Today's Mood Journey</h4>
       <div className="space-y-3 max-h-60 overflow-y-auto">
         {todayEntries.map((entry) => (
           <div key={entry.id} className="flex items-start space-x-3 p-3 bg-slate-50 rounded-lg">
