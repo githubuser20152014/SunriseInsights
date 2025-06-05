@@ -209,25 +209,25 @@ export async function generateDailySummary(dailyData: {
     const totalTasks = dailyData.tasks?.length || 0;
     const moodSummary = dailyData.moods?.map(m => `${m.mood} ${m.emoji} ${m.note || ''}`).join(', ') || 'No mood entries';
     
-    const prompt = `Analyze this person's complete day and create a comprehensive summary:
+    const prompt = `Analyze my complete day and create a comprehensive first-person summary:
 
-BRAIN DUMP/THOUGHTS: ${dailyData.brainDump || 'None recorded'}
+MY BRAIN DUMP/THOUGHTS: ${dailyData.brainDump || 'None recorded'}
 
-DAILY NOTES: ${dailyData.notes || 'None recorded'}
+MY DAILY NOTES: ${dailyData.notes || 'None recorded'}
 
-GRATITUDE JOURNAL: ${dailyData.gratitude || 'None recorded'}
+MY GRATITUDE JOURNAL: ${dailyData.gratitude || 'None recorded'}
 
-MOOD JOURNEY: ${moodSummary}
+MY MOOD JOURNEY: ${moodSummary}
 
-END OF DAY REFLECTION: ${dailyData.reflection || 'None recorded'}
+MY END OF DAY REFLECTION: ${dailyData.reflection || 'None recorded'}
 
-TASKS: ${totalTasks > 0 ? `${completedTasks.length}/${totalTasks} completed` : 'No tasks recorded'}
+MY TASKS: ${totalTasks > 0 ? `${completedTasks.length}/${totalTasks} completed` : 'No tasks recorded'}
 
-TIME LOG: ${dailyData.timeLog?.map(t => `${t.timeSlot}: ${t.activity}`).join(', ') || 'No time log'}
+MY TIME LOG: ${dailyData.timeLog?.map(t => `${t.timeSlot}: ${t.activity}`).join(', ') || 'No time log'}
 
 Create a JSON response with:
-- summary: A thoughtful 2-3 paragraph summary of how their day went
-- highlights: Key positive moments and achievements as a single string with bullet points (use • for each point, separated by newlines)
+- summary: A thoughtful 2-3 paragraph summary written in first person ("I") about how my day went
+- highlights: Key positive moments and achievements written in first person as a single string with bullet points (use • for each point, separated by newlines)
 - moodTheme: Overall mood theme for the day (one phrase)
 - productivityScore: Score 1-10 based on task completion and time usage`;
 
@@ -236,7 +236,7 @@ Create a JSON response with:
       messages: [
         {
           role: "system",
-          content: "You are an expert life coach and wellness analyst. Analyze daily activities with empathy and insight, focusing on growth and positive reinforcement."
+          content: "You are an expert life coach and wellness analyst writing first-person reflections. Write as if you are the person reflecting on their own day, using 'I' statements throughout. Analyze daily activities with empathy and insight, focusing on growth and positive reinforcement."
         },
         {
           role: "user",
