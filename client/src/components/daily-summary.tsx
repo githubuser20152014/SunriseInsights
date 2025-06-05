@@ -40,7 +40,10 @@ export function DailySummary() {
   });
 
   const generateSummaryMutation = useMutation({
-    mutationFn: () => apiRequest('/api/generate-daily-summary', 'POST', { date: today }),
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/generate-daily-summary', { date: today });
+      return response.json();
+    },
     onMutate: () => setIsGenerating(true),
     onSettled: () => setIsGenerating(false),
     onSuccess: () => {
