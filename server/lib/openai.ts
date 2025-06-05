@@ -227,7 +227,7 @@ TIME LOG: ${dailyData.timeLog?.map(t => `${t.timeSlot}: ${t.activity}`).join(', 
 
 Create a JSON response with:
 - summary: A thoughtful 2-3 paragraph summary of how their day went
-- highlights: Key positive moments and achievements (bullet points)
+- highlights: Key positive moments and achievements as a single string with bullet points (use • for each point, separated by newlines)
 - moodTheme: Overall mood theme for the day (one phrase)
 - productivityScore: Score 1-10 based on task completion and time usage`;
 

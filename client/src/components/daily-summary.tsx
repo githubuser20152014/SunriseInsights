@@ -57,7 +57,24 @@ export function DailySummary() {
 
   const formatHighlights = (highlights: string) => {
     if (!highlights) return [];
-    return highlights.split('•').filter(item => item.trim()).map(item => item.trim());
+    
+    // Handle JSON array format if present
+    if (highlights.startsWith('{') || highlights.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(highlights);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch (e) {
+        // Fall through to string parsing
+      }
+    }
+    
+    // Handle bullet point format
+    return highlights
+      .split(/[•\n]/)
+      .filter(item => item.trim())
+      .map(item => item.trim().replace(/^[-*]\s*/, ''));
   };
 
   const getProductivityColor = (score: number) => {
