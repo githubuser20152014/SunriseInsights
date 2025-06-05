@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Sparkles, TrendingUp, Heart, Calendar } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Loader2, Sparkles, TrendingUp, Heart, Calendar, ChevronDown, ChevronRight, History } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface DailySummary {
@@ -21,6 +22,7 @@ interface DailySummary {
 
 export function DailySummary() {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split('T')[0];
 
@@ -37,6 +39,18 @@ export function DailySummary() {
       const data = await response.json();
       return data || null;
     }
+  });
+
+  const { data: historySummaries } = useQuery<DailySummary[]>({
+    queryKey: ['/api/daily-summary-history'],
+    queryFn: async () => {
+      const response = await fetch('/api/daily-summary-history?limit=7');
+      if (!response.ok) {
+        throw new Error('Failed to fetch summary history');
+      }
+      return response.json();
+    },
+    enabled: showHistory
   });
 
   const generateSummaryMutation = useMutation({
@@ -239,6 +253,81 @@ export function DailySummary() {
             </div>
           </div>
         )}
+
+        {/* Previous Summaries */}
+        <Separator className="opacity-20 my-6" />
+        
+        <Collapsible open={showHistory} onOpenChange={setShowHistory}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full justify-between p-0 h-auto font-normal">
+              <div className="flex items-center space-x-2">
+                <History className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Previous Summaries</span>
+              </div>
+              {showHistory ? (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent className="space-y-4 mt-4">
+            {historySummaries && historySummaries.length > 0 ? (
+              historySummaries
+                .filter(h => h.date !== today) // Exclude today's summary
+                .map((historySummary) => (
+                  <div key={historySummary.id} className="p-4 rounded-2xl bg-background/50 border border-border/20">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-medium text-foreground">
+                        {new Date(historySummary.date).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={`${getMoodThemeColor(historySummary.moodTheme)} border-0 text-xs`}>
+                          {historySummary.moodTheme}
+                        </Badge>
+                        <Badge className="bg-slate-100 text-slate-800 border-0 text-xs">
+                          {historySummary.productivityScore}/10
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                      {historySummary.summary}
+                    </p>
+                    
+                    {historySummary.highlights && (
+                      <div className="mt-3">
+                        <p className="text-xs font-medium text-foreground mb-1">Key Highlights:</p>
+                        <ul className="space-y-1">
+                          {formatHighlights(historySummary.highlights).slice(0, 2).map((highlight, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <div className="w-1 h-1 gradient-warm rounded-full mt-1.5 flex-shrink-0"></div>
+                              <span className="text-xs text-muted-foreground leading-relaxed">{highlight}</span>
+                            </li>
+                          ))}
+                          {formatHighlights(historySummary.highlights).length > 2 && (
+                            <li className="text-xs text-muted-foreground/60">
+                              +{formatHighlights(historySummary.highlights).length - 2} more highlights
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))
+            ) : (
+              <div className="text-center py-6">
+                <Calendar className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
+                <p className="text-sm text-muted-foreground">No previous summaries found</p>
+              </div>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   );
