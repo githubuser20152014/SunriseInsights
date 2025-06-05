@@ -81,13 +81,13 @@ export function VoiceRecording() {
   const displayTranscript = transcript + interimTranscript;
 
   return (
-    <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+    <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-            <i className="fas fa-microphone text-blue-600 text-sm"></i>
+          <div className="w-8 h-8 gradient-forest rounded-full flex items-center justify-center animate-gentle-pulse">
+            <i className="fas fa-microphone text-white text-sm"></i>
           </div>
-          <h3 className="text-lg font-medium text-slate-800">Brain Dump</h3>
+          <h3 className="text-lg font-medium text-gradient-warm">Brain Dump</h3>
         </div>
         {isSupported && (
           <Button

@@ -103,8 +103,8 @@ export function MoodHistory() {
 
   if (todayEntries.length === 0) {
     return (
-      <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <h4 className="text-lg font-semibold text-slate-800 mb-4">Today's Mood Journey</h4>
+      <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
+        <h4 className="text-lg font-semibold text-gradient-warm mb-4">Today's Mood Journey</h4>
         <div className="text-center py-8">
           <div className="text-4xl mb-3">📊</div>
           <p className="text-slate-500 text-sm">

@@ -198,13 +198,13 @@ export function TimeTracker() {
   }
 
   return (
-    <Card className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+    <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-            <Clock className="text-blue-600 text-sm" />
+          <div className="w-8 h-8 gradient-forest rounded-full flex items-center justify-center animate-gentle-pulse">
+            <Clock className="text-white text-sm" />
           </div>
-          <h3 className="text-lg font-medium text-slate-800">Time Tracker</h3>
+          <h3 className="text-lg font-medium text-gradient-warm">Time Tracker</h3>
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="secondary" className="text-xs">
