@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney, summarizeTimeLog } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
+import { getWeatherForAlpharetta } from "./lib/weather";
 import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema, insertMoodAnalysisSchema, insertTimeLogSchema, insertTimeLogSummarySchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -15,6 +16,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sunTimes);
     } catch (error) {
       res.status(500).json({ message: "Failed to calculate sun times" });
+    }
+  });
+
+  // Get weather forecast for Alpharetta, GA
+  app.get("/api/weather", async (req, res) => {
+    try {
+      const weather = await getWeatherForAlpharetta();
+      res.json(weather);
+    } catch (error) {
+      console.error("Weather API error:", error);
+      res.status(500).json({ message: "Failed to fetch weather data" });
     }
   });
 

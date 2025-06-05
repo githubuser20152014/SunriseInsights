@@ -22,6 +22,16 @@ interface SunData {
   };
 }
 
+interface WeatherData {
+  temperature: number;
+  maxTemp: number;
+  minTemp: number;
+  condition: string;
+  icon: string;
+  humidity: number;
+  windSpeed: number;
+}
+
 export default function Home() {
   // Initialize daily reset functionality
   useDailyReset();
@@ -29,6 +39,11 @@ export default function Home() {
   const { data: sunData } = useQuery<SunData>({
     queryKey: ["/api/sunrise"],
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
+  });
+
+  const { data: weatherData } = useQuery<WeatherData>({
+    queryKey: ["/api/weather"],
+    staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
   const currentTime = new Date().toLocaleTimeString('en-US', {
@@ -68,15 +83,43 @@ export default function Home() {
         <div className="mb-8 space-y-6">
           {/* Location Status */}
           <div className="glass-card rounded-3xl p-5 border-0 hover-lift animate-gentle-pulse">
-            <div className="flex items-center justify-between text-sm">
+            <div className="grid grid-cols-3 items-center text-sm">
+              {/* Location */}
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 gradient-forest rounded-full flex items-center justify-center">
                   <i className="fas fa-map-marker-alt text-white text-xs"></i>
                 </div>
                 <span className="text-foreground font-medium">Alpharetta, GA</span>
               </div>
-              <div className="text-muted-foreground text-xs">
-                <div className="flex space-x-4">
+              
+              {/* Weather Forecast */}
+              <div className="flex items-center justify-center space-x-3">
+                {weatherData ? (
+                  <>
+                    <div className="text-center">
+                      <div className="text-foreground font-medium capitalize">
+                        {weatherData.condition}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        High: {weatherData.maxTemp}° Low: {weatherData.minTemp}°
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gradient-sunrise">
+                      {weatherData.temperature}°
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center">
+                    <div className="text-muted-foreground text-xs">
+                      Loading weather...
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Sun Times */}
+              <div className="text-muted-foreground text-xs text-right">
+                <div className="flex justify-end space-x-4">
                   <div className="flex items-center space-x-1">
                     <i className="fas fa-sun text-gradient-sunrise text-xs"></i>
                     <span>{sunData?.sunrise?.formatted || "Loading..."}</span>
