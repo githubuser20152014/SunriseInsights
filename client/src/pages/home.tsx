@@ -8,6 +8,7 @@ import { DailyNotes } from "@/components/daily-notes";
 import { DailyGratitude } from "@/components/daily-gratitude";
 import { DailyReflection } from "@/components/daily-reflection";
 import { ProgressStats } from "@/components/progress-stats";
+import { TimeTracker } from "@/components/time-tracker";
 import { useDailyReset } from "@/hooks/use-daily-reset";
 
 interface SunData {
@@ -105,6 +106,11 @@ export default function Home() {
             <DailyNotes />
             <DailyGratitude />
           </div>
+        </div>
+
+        {/* Time Tracker Row */}
+        <div className="mb-6 sm:mb-8">
+          <TimeTracker />
         </div>
 
         {/* Mood Tracking Row */}

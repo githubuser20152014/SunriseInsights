@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
-import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema, insertMoodAnalysisSchema } from "@shared/schema";
+import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema, insertMoodAnalysisSchema, insertTimeLogSchema, insertTimeLogSummarySchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -467,6 +467,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(analyses);
     } catch (error) {
       res.status(500).json({ message: "Failed to get mood analysis history" });
+    }
+  });
+
+  // Time Log Routes
+  
+  // Save/update time log entry
+  app.post("/api/time-log", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const validatedEntry = insertTimeLogSchema.parse(req.body);
+      
+      const entry = await storage.saveTimeLogEntry({ ...validatedEntry, userId });
+      res.json(entry);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to save time log entry" });
+    }
+  });
+
+  // Get time log entries for a specific date
+  app.get("/api/time-log", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ message: "Date parameter is required" });
+      }
+      
+      const entries = await storage.getTimeLogEntries(userId, date);
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get time log entries" });
+    }
+  });
+
+  // Update time log entry
+  app.patch("/api/time-log/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { activity } = req.body;
+      
+      if (!activity) {
+        return res.status(400).json({ message: "Activity is required" });
+      }
+      
+      const entry = await storage.updateTimeLogEntry(id, activity);
+      if (!entry) {
+        return res.status(404).json({ message: "Time log entry not found" });
+      }
+      
+      res.json(entry);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update time log entry" });
+    }
+  });
+
+  // Delete time log entry
+  app.delete("/api/time-log/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteTimeLogEntry(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Time log entry not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete time log entry" });
+    }
+  });
+
+  // Save/update time log summary
+  app.post("/api/time-log-summary", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const validatedSummary = insertTimeLogSummarySchema.parse(req.body);
+      
+      const summary = await storage.saveTimeLogSummary({ ...validatedSummary, userId });
+      res.json(summary);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to save time log summary" });
+    }
+  });
+
+  // Get time log summary for a specific date
+  app.get("/api/time-log-summary", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ message: "Date parameter is required" });
+      }
+      
+      const summary = await storage.getTimeLogSummary(userId, date);
+      res.json(summary || {});
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get time log summary" });
+    }
+  });
+
+  // Get time log summary history
+  app.get("/api/time-log-summary-history", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      const summaries = await storage.getTimeLogSummaryHistory(userId, limit);
+      res.json(summaries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get time log summary history" });
     }
   });
 
