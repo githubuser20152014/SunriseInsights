@@ -295,7 +295,7 @@ export function DailyTasks() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-slate-400 hover:text-blue-500 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                    className="text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
                     onClick={() => startEditing(task)}
                     title="Edit task"
                   >
@@ -305,7 +305,7 @@ export function DailyTasks() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-slate-400 hover:text-red-500 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                  className="text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
                   onClick={() => deleteTask(task.id)}
                   title="Delete task"
                 >
