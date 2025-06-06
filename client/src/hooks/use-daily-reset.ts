@@ -26,7 +26,8 @@ export function useDailyReset() {
           if (key && (
             key.startsWith('daily-mood-') ||
             key.startsWith('daily-notes-') ||
-            key.startsWith('daily-reflection-')
+            key.startsWith('daily-reflection-') ||
+            key.startsWith('daily-gratitude-')
           )) {
             keysToRemove.push(key);
           }

@@ -42,13 +42,17 @@ export function DailyGratitude() {
 
   // Update local state when data loads
   useEffect(() => {
-    if (gratitudeData?.content) {
+    if (gratitudeData?.content && gratitudeData.content.trim()) {
       setGratitude(gratitudeData.content);
       if (gratitudeData.updatedAt) {
         setLastSaved(new Date(gratitudeData.updatedAt));
       }
+    } else {
+      // Clear the gratitude for new day or empty content
+      setGratitude("");
+      setLastSaved(null);
     }
-  }, [gratitudeData]);
+  }, [gratitudeData, today]);
 
   const saveGratitudeMutation = useMutation({
     mutationFn: async (content: string) => {
