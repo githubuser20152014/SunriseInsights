@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,10 +13,12 @@ interface DailyTask {
   completed: boolean;
   date: string;
   createdAt: string;
+  type?: 'task' | 'habit';
 }
 
 export function DailyTasks() {
   const [newTaskText, setNewTaskText] = useState("");
+  const [newHabitText, setNewHabitText] = useState("");
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   const [editingTask, setEditingTask] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
@@ -26,33 +29,49 @@ export function DailyTasks() {
     queryKey: ["/api/daily-tasks"],
   });
 
-  // Sort tasks: incomplete first, then completed at bottom
-  const sortedTasks = useMemo(() => {
-    return [...tasks].sort((a, b) => {
-      if (a.completed === b.completed) {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      }
-      return a.completed ? 1 : -1;
-    });
+  // Separate and sort tasks and habits
+  const { sortedTasks, sortedHabits } = useMemo(() => {
+    const taskItems = tasks.filter(item => !item.type || item.type === 'task');
+    const habitItems = tasks.filter(item => item.type === 'habit');
+    
+    const sortItems = (items: DailyTask[]) => 
+      [...items].sort((a, b) => {
+        if (a.completed === b.completed) {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+        return a.completed ? 1 : -1;
+      });
+
+    return {
+      sortedTasks: sortItems(taskItems),
+      sortedHabits: sortItems(habitItems)
+    };
   }, [tasks]);
 
+  const canAddTask = sortedTasks.length < 3;
+  const canAddHabit = sortedHabits.length < 3;
+
   const createTaskMutation = useMutation({
-    mutationFn: async (text: string) => {
-      const response = await apiRequest("POST", "/api/daily-tasks", { text });
+    mutationFn: async ({ text, type }: { text: string; type: 'task' | 'habit' }) => {
+      const response = await apiRequest("POST", "/api/daily-tasks", { text, type });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/daily-tasks"] });
-      setNewTaskText("");
+      if (variables.type === 'task') {
+        setNewTaskText("");
+      } else {
+        setNewHabitText("");
+      }
       toast({
-        title: "Task added",
-        description: "Your new task has been added to today's list.",
+        title: variables.type === 'task' ? "Task added" : "Habit added",
+        description: `Your new ${variables.type} has been added to today's list.`,
       });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to add task",
+        description: error.message || "Failed to add item",
         variant: "destructive",
       });
     },
