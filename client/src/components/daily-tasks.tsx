@@ -139,14 +139,26 @@ export function DailyTasks() {
   });
 
   const handleAddTask = () => {
-    if (newTaskText.trim() && tasks.length < 3) {
-      createTaskMutation.mutate(newTaskText.trim());
+    if (newTaskText.trim() && canAddTask) {
+      createTaskMutation.mutate({ text: newTaskText.trim(), type: 'task' });
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleAddHabit = () => {
+    if (newHabitText.trim() && canAddHabit) {
+      createTaskMutation.mutate({ text: newHabitText.trim(), type: 'habit' });
+    }
+  };
+
+  const handleTaskKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleAddTask();
+    }
+  };
+
+  const handleHabitKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleAddHabit();
     }
   };
 
@@ -234,14 +246,22 @@ export function DailyTasks() {
           <h3 className="text-lg font-medium text-gradient-warm">Today's Focus</h3>
         </div>
         <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
-          {tasks.length}/3 tasks
+          {sortedTasks.length + sortedHabits.length}/6 items
         </span>
       </div>
 
-      <div className="space-y-3">
-        {/* Existing Tasks */}
-        {sortedTasks.map((task, index) => (
-          <div 
+      <div className="space-y-4">
+        {/* Tasks Section */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-muted-foreground">Tasks</h4>
+            <span className="text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded-full">
+              {sortedTasks.length}/3
+            </span>
+          </div>
+          
+          {sortedTasks.map((task, index) => (
+            <div 
             key={task.id} 
             className={`group flex items-start space-x-3 p-3 bg-secondary/50 rounded-xl transition-all-smooth hover-lift ${
               draggedItem === task.id ? 'opacity-50 scale-95' : 'hover:bg-secondary/70'
@@ -344,31 +364,160 @@ export function DailyTasks() {
           </div>
         ))}
 
-        {/* Add New Task */}
-        {tasks.length < 3 && (
-          <div className="flex items-center space-x-3 p-3 border-2 border-dashed border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
-            <div className="w-5 h-5 border-2 border-slate-300 rounded-full flex items-center justify-center">
-              <i className="fas fa-plus text-slate-400 text-xs"></i>
+          {/* Add New Task */}
+          {canAddTask && (
+            <div className="flex items-center space-x-3 p-3 border-2 border-dashed border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
+              <div className="w-5 h-5 border-2 border-slate-300 rounded-full flex items-center justify-center">
+                <i className="fas fa-plus text-slate-400 text-xs"></i>
+              </div>
+              <Input
+                type="text"
+                placeholder="Add a task for today..."
+                value={newTaskText}
+                onChange={(e) => setNewTaskText(e.target.value)}
+                onKeyPress={handleTaskKeyPress}
+                className="flex-1 border-none bg-transparent focus:ring-0 focus:border-none shadow-none p-0"
+                disabled={createTaskMutation.isPending}
+              />
             </div>
-            <Input
-              type="text"
-              placeholder="Add a task for today..."
-              value={newTaskText}
-              onChange={(e) => setNewTaskText(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="flex-1 border-none bg-transparent focus:ring-0 focus:border-none shadow-none p-0"
-              disabled={createTaskMutation.isPending}
-            />
-          </div>
-        )}
+          )}
+        </div>
 
-        {tasks.length === 3 && (
-          <div className="text-center py-2">
-            <p className="text-xs text-slate-500">
-              You've reached the maximum of 3 tasks for today. Focus on completing these!
-            </p>
+        {/* Divider */}
+        <Separator className="my-4" />
+
+        {/* Habits Section */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-muted-foreground">Habits</h4>
+            <span className="text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded-full">
+              {sortedHabits.length}/3
+            </span>
           </div>
-        )}
+          
+          {sortedHabits.map((habit, index) => (
+            <div 
+              key={habit.id} 
+              className={`group flex items-start space-x-3 p-3 bg-secondary/50 rounded-xl transition-all-smooth hover-lift ${
+                draggedItem === habit.id ? 'opacity-50 scale-95' : 'hover:bg-secondary/70'
+              } ${!habit.completed ? 'cursor-move' : ''}`}
+              draggable={!habit.completed}
+              onDragStart={(e) => !habit.completed && handleDragStart(e, habit.id)}
+              onDragOver={!habit.completed ? handleDragOver : undefined}
+              onDrop={(e) => !habit.completed && handleDrop(e, index)}
+              onDragEnd={!habit.completed ? handleDragEnd : undefined}
+            >
+              <div className="flex items-center space-x-2">
+                {!habit.completed && (
+                  <i className="fas fa-grip-vertical text-slate-400 text-xs cursor-move" title="Drag to reorder"></i>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-6 h-6 sm:w-5 sm:h-5 p-0 border-2 border-slate-300 rounded-full flex items-center justify-center hover:border-emerald-500 transition-colors min-h-[1.5rem] min-w-[1.5rem] sm:min-h-[1.25rem] sm:min-w-[1.25rem]"
+                  onClick={() => toggleTask(habit.id, habit.completed)}
+                >
+                  {habit.completed && (
+                    <i className="fas fa-check text-emerald-500 text-xs"></i>
+                  )}
+                </Button>
+              </div>
+              <div className="flex-1">
+                {editingTask === habit.id ? (
+                  <Input
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    onKeyDown={handleEditKeyPress}
+                    onBlur={saveEdit}
+                    className="border-none bg-transparent focus:ring-1 focus:ring-blue-300 focus:border-blue-300 shadow-none p-0 text-slate-700"
+                    autoFocus
+                  />
+                ) : (
+                  <span 
+                    className={`text-sm cursor-pointer ${
+                      habit.completed ? 'line-through text-slate-500' : 'text-slate-700 dark:text-slate-200'
+                    }`}
+                    onClick={() => !habit.completed && startEditing(habit)}
+                  >
+                    {habit.text}
+                  </span>
+                )}
+              </div>
+              {editingTask === habit.id ? (
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-emerald-600 hover:text-emerald-700 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                    onClick={saveEdit}
+                    title="Save changes"
+                  >
+                    <i className="fas fa-check text-xs"></i>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-500 hover:text-slate-600 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                    onClick={cancelEdit}
+                    title="Cancel"
+                  >
+                    <i className="fas fa-times text-xs"></i>
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {!habit.completed && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem] bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600"
+                      onClick={() => startEditing(habit)}
+                      title="Edit habit"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                        <path d="m15 5 4 4"/>
+                      </svg>
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem] bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600"
+                    onClick={() => deleteTask(habit.id)}
+                    title="Delete habit"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                      <line x1="10" x2="10" y1="11" y2="17"/>
+                      <line x1="14" x2="14" y1="11" y2="17"/>
+                    </svg>
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Add New Habit */}
+          {canAddHabit && (
+            <div className="flex items-center space-x-3 p-3 border-2 border-dashed border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
+              <div className="w-5 h-5 border-2 border-slate-300 rounded-full flex items-center justify-center">
+                <i className="fas fa-plus text-slate-400 text-xs"></i>
+              </div>
+              <Input
+                type="text"
+                placeholder="Add a habit for today..."
+                value={newHabitText}
+                onChange={(e) => setNewHabitText(e.target.value)}
+                onKeyPress={handleHabitKeyPress}
+                className="flex-1 border-none bg-transparent focus:ring-0 focus:border-none shadow-none p-0"
+                disabled={createTaskMutation.isPending}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </Card>
   );
