@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new daily task
   app.post("/api/daily-tasks", async (req, res) => {
     try {
-      const { text } = req.body;
+      const { text, type = "task" } = req.body;
       
       if (!text || text.trim().length === 0) {
         return res.status(400).json({ message: "Task text is required" });
@@ -118,16 +118,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = 1;
       const today = new Date().toISOString().split('T')[0];
 
-      // Check if user already has 3 tasks for today
+      // Check if user already has 3 items of this type for today
       const existingTasks = await storage.getDailyTasks(userId, today);
-      if (existingTasks.length >= 3) {
-        return res.status(400).json({ message: "Maximum of 3 tasks per day allowed" });
+      const existingItemsOfType = existingTasks.filter(task => (task.type || 'task') === type);
+      
+      if (existingItemsOfType.length >= 3) {
+        return res.status(400).json({ message: `Maximum of 3 ${type}s per day allowed` });
       }
 
       const taskData = {
         userId,
         text: text.trim(),
         completed: false,
+        type,
         date: today,
       };
 

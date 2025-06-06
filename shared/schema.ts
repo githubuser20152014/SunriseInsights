@@ -21,6 +21,7 @@ export const dailyTasks = pgTable("daily_tasks", {
   userId: integer("user_id").notNull(),
   text: text("text").notNull(),
   completed: boolean("completed").default(false).notNull(),
+  type: text("type").default("task").notNull(), // 'task' or 'habit'
   date: text("date").notNull(), // YYYY-MM-DD format
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -123,6 +124,8 @@ export const insertVoiceRecordingSchema = createInsertSchema(voiceRecordings).om
 export const insertDailyTaskSchema = createInsertSchema(dailyTasks).omit({
   id: true,
   createdAt: true,
+}).extend({
+  type: z.enum(["task", "habit"]).default("task"),
 });
 
 export const insertDailyReflectionSchema = createInsertSchema(dailyReflections).omit({
