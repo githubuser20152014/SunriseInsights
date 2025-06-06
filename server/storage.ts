@@ -50,6 +50,7 @@ export interface IStorage {
   createDailyTask(task: InsertDailyTask): Promise<DailyTask>;
   getDailyTasks(userId: number, date: string): Promise<DailyTask[]>;
   updateDailyTask(id: number, completed: boolean): Promise<DailyTask | undefined>;
+  updateDailyTaskText(id: number, text: string): Promise<DailyTask | undefined>;
   deleteDailyTask(id: number): Promise<boolean>;
   
   createDailyReflection(reflection: InsertDailyReflection & { userId: number }): Promise<DailyReflection>;
@@ -231,6 +232,16 @@ export class MemStorage implements IStorage {
         }
       }
       
+      return task;
+    }
+    return undefined;
+  }
+
+  async updateDailyTaskText(id: number, text: string): Promise<DailyTask | undefined> {
+    const task = this.dailyTasks.get(id);
+    if (task) {
+      task.text = text;
+      this.dailyTasks.set(id, task);
       return task;
     }
     return undefined;

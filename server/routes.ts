@@ -141,17 +141,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update task completion status
+  // Update task completion status or text
   app.patch("/api/daily-tasks/:id", async (req, res) => {
     try {
       const taskId = parseInt(req.params.id);
-      const { completed } = req.body;
+      const { completed, text } = req.body;
 
-      if (typeof completed !== "boolean") {
+      // Validate inputs
+      if (completed !== undefined && typeof completed !== "boolean") {
         return res.status(400).json({ message: "Completed status must be a boolean" });
       }
 
-      const task = await storage.updateDailyTask(taskId, completed);
+      if (text !== undefined && (typeof text !== "string" || text.trim().length === 0)) {
+        return res.status(400).json({ message: "Task text must be a non-empty string" });
+      }
+
+      let task;
+      if (completed !== undefined) {
+        task = await storage.updateDailyTask(taskId, completed);
+      } else if (text !== undefined) {
+        task = await storage.updateDailyTaskText(taskId, text.trim());
+      } else {
+        return res.status(400).json({ message: "Either completed status or text must be provided" });
+      }
       
       if (!task) {
         return res.status(404).json({ message: "Task not found" });

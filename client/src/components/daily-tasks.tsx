@@ -17,6 +17,8 @@ interface DailyTask {
 export function DailyTasks() {
   const [newTaskText, setNewTaskText] = useState("");
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
+  const [editingTask, setEditingTask] = useState<number | null>(null);
+  const [editText, setEditText] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -74,6 +76,29 @@ export function DailyTasks() {
     },
   });
 
+  const editTaskMutation = useMutation({
+    mutationFn: async ({ id, text }: { id: number; text: string }) => {
+      const response = await apiRequest("PATCH", `/api/daily-tasks/${id}`, { text });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-tasks"] });
+      setEditingTask(null);
+      setEditText("");
+      toast({
+        title: "Task updated",
+        description: "Your task has been updated.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteTaskMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest("DELETE", `/api/daily-tasks/${id}`);
@@ -112,6 +137,30 @@ export function DailyTasks() {
 
   const deleteTask = (id: number) => {
     deleteTaskMutation.mutate(id);
+  };
+
+  const startEditing = (task: DailyTask) => {
+    setEditingTask(task.id);
+    setEditText(task.text);
+  };
+
+  const saveEdit = () => {
+    if (editText.trim() && editingTask) {
+      editTaskMutation.mutate({ id: editingTask, text: editText.trim() });
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingTask(null);
+    setEditText("");
+  };
+
+  const handleEditKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      saveEdit();
+    } else if (e.key === "Escape") {
+      cancelEdit();
+    }
   };
 
   const handleDragStart = (e: React.DragEvent, taskId: number) => {
@@ -200,18 +249,70 @@ export function DailyTasks() {
               </Button>
             </div>
             <div className="flex-1">
-              <p className={`text-slate-700 ${task.completed ? 'line-through text-slate-500' : ''}`}>
-                {task.text}
-              </p>
+              {editingTask === task.id ? (
+                <Input
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onKeyDown={handleEditKeyPress}
+                  onBlur={saveEdit}
+                  className="border-none bg-transparent focus:ring-1 focus:ring-blue-300 focus:border-blue-300 shadow-none p-0 text-slate-700"
+                  autoFocus
+                />
+              ) : (
+                <p 
+                  className={`text-slate-700 cursor-pointer hover:bg-slate-100 rounded px-1 py-0.5 transition-colors ${task.completed ? 'line-through text-slate-500' : ''}`}
+                  onClick={() => !task.completed && startEditing(task)}
+                  title={!task.completed ? "Click to edit" : ""}
+                >
+                  {task.text}
+                </p>
+              )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-slate-400 hover:text-red-500 transition-colors p-2 sm:p-1 min-h-[2rem] min-w-[2rem] sm:min-h-[1.5rem] sm:min-w-[1.5rem]"
-              onClick={() => deleteTask(task.id)}
-            >
-              <i className="fas fa-times text-sm"></i>
-            </Button>
+            
+            {editingTask === task.id ? (
+              <div className="flex items-center space-x-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-green-500 hover:text-green-600 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                  onClick={saveEdit}
+                  disabled={editTaskMutation.isPending}
+                >
+                  <i className="fas fa-check text-xs"></i>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-400 hover:text-slate-600 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                  onClick={cancelEdit}
+                >
+                  <i className="fas fa-times text-xs"></i>
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1">
+                {!task.completed && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-400 hover:text-blue-500 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                    onClick={() => startEditing(task)}
+                    title="Edit task"
+                  >
+                    <i className="fas fa-edit text-xs"></i>
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-400 hover:text-red-500 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                  onClick={() => deleteTask(task.id)}
+                  title="Delete task"
+                >
+                  <i className="fas fa-times text-xs"></i>
+                </Button>
+              </div>
+            )}
           </div>
         ))}
 
