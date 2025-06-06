@@ -16,8 +16,14 @@ export function useDailyReset() {
       const lastDate = localStorage.getItem('lastActiveDate');
       
       if (lastDate && lastDate !== currentDate) {
-        // It's a new day - invalidate all queries to refresh the UI
-        queryClient.invalidateQueries();
+        // It's a new day - invalidate all date-specific queries
+        queryClient.invalidateQueries({ queryKey: ['/api/daily-summary'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/daily-notes'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/daily-gratitude'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/daily-tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/time-log'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/time-log-summary'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/mood-analysis'] });
         
         // Clear any localStorage data that should reset daily
         const keysToRemove: string[] = [];

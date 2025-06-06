@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Loader2, Sparkles, TrendingUp, Heart, Calendar, ChevronDown, ChevronRight, History } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { useDailyReset } from "@/hooks/use-daily-reset";
 
 interface DailySummary {
   id: number;
@@ -24,7 +25,18 @@ export function DailySummary() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const queryClient = useQueryClient();
-  const today = new Date().toISOString().split('T')[0];
+  
+  // Use Eastern Time like other components
+  const getEasternDate = () => {
+    const now = new Date();
+    const easternTime = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+    return easternTime.toISOString().split('T')[0];
+  };
+  
+  const today = getEasternDate();
+  
+  // Use daily reset hook to ensure proper date handling
+  useDailyReset();
 
   const { data: summary, isLoading } = useQuery<DailySummary>({
     queryKey: ['/api/daily-summary', today],
