@@ -400,6 +400,16 @@ export class DatabaseStorage implements IStorage {
     return task || undefined;
   }
 
+  async updateDailyTaskText(id: number, text: string): Promise<DailyTask | undefined> {
+    const [task] = await db
+      .update(dailyTasks)
+      .set({ text })
+      .where(eq(dailyTasks.id, id))
+      .returning();
+    
+    return task || undefined;
+  }
+
   async deleteDailyTask(id: number): Promise<boolean> {
     const result = await db
       .delete(dailyTasks)
