@@ -433,14 +433,13 @@ export function DailyTasks() {
                     autoFocus
                   />
                 ) : (
-                  <span 
-                    className={`text-sm cursor-pointer ${
-                      habit.completed ? 'line-through text-slate-500' : 'text-slate-700 dark:text-slate-200'
-                    }`}
+                  <p 
+                    className={`text-slate-700 cursor-pointer hover:bg-slate-100 rounded px-1 py-0.5 transition-colors ${habit.completed ? 'line-through text-slate-500' : ''}`}
                     onClick={() => !habit.completed && startEditing(habit)}
+                    title={!habit.completed ? "Click to edit" : ""}
                   >
                     {habit.text}
-                  </span>
+                  </p>
                 )}
               </div>
               {editingTask === habit.id ? (
