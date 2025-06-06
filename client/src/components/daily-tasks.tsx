@@ -224,7 +224,7 @@ export function DailyTasks() {
         {sortedTasks.map((task, index) => (
           <div 
             key={task.id} 
-            className={`flex items-start space-x-3 p-3 bg-secondary/50 rounded-xl transition-all-smooth hover-lift ${
+            className={`group flex items-start space-x-3 p-3 bg-secondary/50 rounded-xl transition-all-smooth hover-lift ${
               draggedItem === task.id ? 'opacity-50 scale-95' : 'hover:bg-secondary/70'
             } ${!task.completed ? 'cursor-move' : ''}`}
             draggable={!task.completed}
@@ -290,12 +290,12 @@ export function DailyTasks() {
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 {!task.completed && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                    className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem] bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600"
                     onClick={() => startEditing(task)}
                     title="Edit task"
                   >
@@ -305,7 +305,7 @@ export function DailyTasks() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                  className="text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem] bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600"
                   onClick={() => deleteTask(task.id)}
                   title="Delete task"
                 >
