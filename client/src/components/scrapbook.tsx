@@ -350,7 +350,7 @@ export function Scrapbook() {
         {!isCreating ? (
           <Button
             onClick={() => setIsCreating(true)}
-            className="w-full"
+            className="w-full bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 border-slate-300 transition-all-smooth"
             variant="outline"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -359,25 +359,25 @@ export function Scrapbook() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title" className="text-sm font-medium text-slate-700">Title</Label>
               <Input
                 id="title"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="Enter title..."
-                className="mt-1"
+                className="mt-1 bg-gradient-to-r from-slate-50 to-slate-100 border-slate-300 focus:border-slate-400 transition-all-smooth"
                 autoFocus
               />
             </div>
             <div>
-              <Label htmlFor="body">Content</Label>
+              <Label htmlFor="body" className="text-sm font-medium text-slate-700">Content</Label>
               <Textarea
                 id="body"
                 value={newBody}
                 onChange={(e) => setNewBody(e.target.value)}
                 onPaste={handlePaste}
                 placeholder="Add text, links, or paste screenshots directly (Ctrl+V)..."
-                className="mt-1 min-h-[100px]"
+                className="mt-1 min-h-[100px] bg-gradient-to-r from-slate-50 to-slate-100 border-slate-300 focus:border-slate-400 transition-all-smooth"
               />
             </div>
             
@@ -586,14 +586,14 @@ export function Scrapbook() {
                     ) : entry.tags && entry.tags.length > 0 ? (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {entry.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
+                          <Badge key={tag} variant="secondary" className="text-xs bg-gradient-to-r from-slate-200 to-slate-300 text-slate-700 border-0">
                             {tag}
                           </Badge>
                         ))}
                       </div>
                     ) : (
                       <div className="mt-2">
-                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                        <Badge variant="outline" className="text-xs text-muted-foreground border-slate-300">
                           No tags
                         </Badge>
                       </div>
