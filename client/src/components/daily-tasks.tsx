@@ -562,20 +562,19 @@ export function DailyTasks() {
               onDragEnd={() => setDraggedItem(null)}
             >
               <div className="flex items-center space-x-3 flex-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
+                  type="button"
                   onClick={() => toggleTask(learn.id, learn.completed)}
-                  className={`w-5 h-5 border-2 rounded-full p-0 transition-all-smooth ${
+                  className={`w-5 h-5 border-2 rounded-full flex items-center justify-center transition-all-smooth hover:scale-110 focus:outline-none focus:ring-2 focus:ring-green-300 ${
                     learn.completed 
                       ? 'bg-green-500 border-green-500 hover:bg-green-600 hover:border-green-600' 
-                      : 'border-slate-300 hover:border-green-400 dark:border-slate-600 dark:hover:border-green-500'
+                      : 'bg-white border-slate-300 hover:border-green-400 dark:bg-slate-800 dark:border-slate-600 dark:hover:border-green-500'
                   }`}
                 >
                   {learn.completed && (
                     <i className="fas fa-check text-white text-xs"></i>
                   )}
-                </Button>
+                </button>
                 
                 {editingTask === learn.id ? (
                   <Input
