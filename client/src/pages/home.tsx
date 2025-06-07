@@ -6,6 +6,7 @@ import { MoodSelector } from "@/components/mood-selector";
 import { MoodHistory } from "@/components/mood-history";
 import { DailyNotes } from "@/components/daily-notes";
 import { DailyGratitude } from "@/components/daily-gratitude";
+import { Scrapbook } from "@/components/scrapbook";
 import { DailyReflection } from "@/components/daily-reflection";
 
 import { TimeTracker } from "@/components/time-tracker";
@@ -148,6 +149,7 @@ export default function Home() {
           <DailyTasks />
           <div className="space-y-4 sm:space-y-6">
             <DailyNotes />
+            <Scrapbook />
             <DailyGratitude />
           </div>
         </div>

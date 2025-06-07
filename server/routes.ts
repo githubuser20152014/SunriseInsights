@@ -757,5 +757,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create scrapbook entry
+  app.post("/api/scrapbook", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const validatedData = insertScrapbookSchema.parse(req.body);
+      
+      const entry = await storage.createScrapbookEntry({
+        ...validatedData,
+        userId,
+      });
+      
+      res.json(entry);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid input data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create scrapbook entry" });
+    }
+  });
+
+  // Get scrapbook entries
+  app.get("/api/scrapbook", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      
+      const entries = await storage.getScrapbookEntries(userId, limit);
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get scrapbook entries" });
+    }
+  });
+
+  // Delete scrapbook entry
+  app.delete("/api/scrapbook/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteScrapbookEntry(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Scrapbook entry not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete scrapbook entry" });
+    }
+  });
+
   return httpServer;
 }
