@@ -525,13 +525,54 @@ export function Scrapbook() {
                       </div>
                     </div>
                     {renderBodyContent(entry.body)}
-                    {entry.tags && entry.tags.length > 0 && (
+                    {editingEntry === entry.id ? (
+                      <div className="mt-2 space-y-2">
+                        <div>
+                          <Label htmlFor={`edit-tags-${entry.id}`} className="text-xs text-muted-foreground">
+                            Edit Tags
+                          </Label>
+                          <Input
+                            id={`edit-tags-${entry.id}`}
+                            value={editTags}
+                            onChange={(e) => setEditTags(e.target.value)}
+                            placeholder="Enter tags separated by spaces or commas..."
+                            className="text-xs"
+                          />
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveTags(entry.id)}
+                            disabled={updateEntryMutation.isPending}
+                            className="h-6 px-2 text-xs"
+                          >
+                            <Check className="w-3 h-3 mr-1" />
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleCancelEdit}
+                            disabled={updateEntryMutation.isPending}
+                            className="h-6 px-2 text-xs"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : entry.tags && entry.tags.length > 0 ? (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {entry.tags.map((tag) => (
                           <Badge key={tag} variant="secondary" className="text-xs">
                             {tag}
                           </Badge>
                         ))}
+                      </div>
+                    ) : (
+                      <div className="mt-2">
+                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                          No tags
+                        </Badge>
                       </div>
                     )}
                     {entry.imageUrl && (
