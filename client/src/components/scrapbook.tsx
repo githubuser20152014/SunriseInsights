@@ -33,7 +33,7 @@ export function Scrapbook() {
 
   const createEntryMutation = useMutation({
     mutationFn: (data: { title: string; body: string }) =>
-      apiRequest("/api/scrapbook", "POST", data),
+      apiRequest("POST", "/api/scrapbook", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scrapbook"] });
       setNewTitle("");
@@ -55,7 +55,7 @@ export function Scrapbook() {
 
   const deleteEntryMutation = useMutation({
     mutationFn: (id: number) =>
-      apiRequest(`/api/scrapbook/${id}`, "DELETE"),
+      apiRequest("DELETE", `/api/scrapbook/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scrapbook"] });
       toast({
