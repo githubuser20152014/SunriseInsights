@@ -93,6 +93,8 @@ export interface IStorage {
   
   createScrapbookEntry(entry: InsertScrapbook & { userId: number }): Promise<Scrapbook>;
   getScrapbookEntries(userId: number, limit?: number): Promise<Scrapbook[]>;
+  searchScrapbookEntries(userId: number, tags: string[]): Promise<Scrapbook[]>;
+  getAllScrapbookTags(userId: number): Promise<string[]>;
   deleteScrapbookEntry(id: number): Promise<boolean>;
 }
 
@@ -808,6 +810,39 @@ export class DatabaseStorage implements IStorage {
       .where(eq(scrapbook.userId, userId))
       .orderBy(sql`${scrapbook.createdAt} DESC`)
       .limit(limit);
+  }
+
+  async searchScrapbookEntries(userId: number, tags: string[]): Promise<Scrapbook[]> {
+    if (tags.length === 0) {
+      return this.getScrapbookEntries(userId);
+    }
+    
+    return await db
+      .select()
+      .from(scrapbook)
+      .where(
+        and(
+          eq(scrapbook.userId, userId),
+          sql`${scrapbook.tags} && ${tags}`
+        )
+      )
+      .orderBy(sql`${scrapbook.createdAt} DESC`);
+  }
+
+  async getAllScrapbookTags(userId: number): Promise<string[]> {
+    const entries = await db
+      .select({ tags: scrapbook.tags })
+      .from(scrapbook)
+      .where(eq(scrapbook.userId, userId));
+    
+    const allTags = new Set<string>();
+    entries.forEach(entry => {
+      if (entry.tags) {
+        entry.tags.forEach(tag => allTags.add(tag));
+      }
+    });
+    
+    return Array.from(allTags).sort();
   }
 
   async deleteScrapbookEntry(id: number): Promise<boolean> {

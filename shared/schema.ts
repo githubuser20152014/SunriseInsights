@@ -117,6 +117,7 @@ export const scrapbook = pgTable("scrapbook", {
   title: text("title").notNull(),
   body: text("body").notNull(),
   imageUrl: text("image_url"),
+  tags: text("tags").array(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

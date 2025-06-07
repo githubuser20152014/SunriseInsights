@@ -799,14 +799,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/scrapbook", upload.single('image'), async (req, res) => {
     try {
       const userId = 1; // For demo purposes
-      const { title, body } = req.body;
+      const { title, body, tags } = req.body;
       
       // Validate required fields
       if (!title || !body) {
         return res.status(400).json({ message: "Title and body are required" });
       }
       
-      const entryData: any = { title, body, userId };
+      // Parse tags from string (space or comma separated)
+      let tagsArray: string[] = [];
+      if (tags) {
+        tagsArray = tags.split(/[,\s]+/).filter((tag: string) => tag.trim().length > 0);
+      }
+      
+      const entryData: any = { title, body, tags: tagsArray, userId };
       
       // Add image URL if file was uploaded
       if (req.file) {
@@ -831,6 +837,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(entries);
     } catch (error) {
       res.status(500).json({ message: "Failed to get scrapbook entries" });
+    }
+  });
+
+  // Search scrapbook entries by tags
+  app.get("/api/scrapbook/search", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const { tags } = req.query;
+      const tagArray = tags ? (typeof tags === 'string' ? [tags] : tags as string[]) : [];
+      
+      const entries = await storage.searchScrapbookEntries(userId, tagArray);
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search scrapbook entries" });
+    }
+  });
+
+  // Get all available tags
+  app.get("/api/scrapbook/tags", async (req, res) => {
+    try {
+      const userId = 1; // For demo purposes
+      const tags = await storage.getAllScrapbookTags(userId);
+      res.json(tags);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get scrapbook tags" });
     }
   });
 
