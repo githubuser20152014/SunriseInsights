@@ -139,7 +139,7 @@ export function Scrapbook() {
   });
 
   const { data: searchResults = entries } = useQuery<ScrapbookEntry[]>({
-    queryKey: ["/api/scrapbook/search", searchTags, entries.length],
+    queryKey: ["/api/scrapbook/search", searchTags, entries.length, JSON.stringify(entries)],
     queryFn: async () => {
       if (!searchTags.trim()) return entries;
       const tagArray = searchTags.split(/[,\s]+/).filter(tag => tag.trim().length > 0);
@@ -207,6 +207,7 @@ export function Scrapbook() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scrapbook"] });
       queryClient.invalidateQueries({ queryKey: ["/api/scrapbook/tags"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/scrapbook/search"] });
       setEditingEntry(null);
       setEditTags("");
       toast({
@@ -214,7 +215,8 @@ export function Scrapbook() {
         description: "Entry tags have been updated.",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Tag update error:", error);
       toast({
         title: "Error",
         description: "Failed to update entry tags.",
@@ -538,6 +540,28 @@ export function Scrapbook() {
                             placeholder="Enter tags separated by spaces or commas..."
                             className="text-xs"
                           />
+                          {allTags.length > 0 && (
+                            <div className="mt-1">
+                              <p className="text-xs text-muted-foreground mb-1">Click to add:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {allTags.slice(0, 8).map((tag) => (
+                                  <Badge
+                                    key={tag}
+                                    variant="outline"
+                                    className="text-xs cursor-pointer hover:bg-muted"
+                                    onClick={() => {
+                                      const currentTags = editTags.split(/[,\s]+/).filter(t => t.trim());
+                                      if (!currentTags.includes(tag)) {
+                                        setEditTags(currentTags.concat(tag).join(' '));
+                                      }
+                                    }}
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                         <div className="flex gap-1">
                           <Button
