@@ -325,13 +325,12 @@ export function Scrapbook() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center text-lg font-semibold">
-          Scrapbook
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-gradient-warm">Scrapbook</h3>
+        <span className="text-sm text-muted-foreground">Collect interesting content</span>
+      </div>
+      <div className="space-y-4">
         {/* Search by Tags */}
         <div>
           <Label htmlFor="search" className="flex items-center gap-2">
@@ -501,7 +500,7 @@ export function Scrapbook() {
                 searchResults.map((entry) => (
                   <div
                     key={entry.id}
-                    className="p-3 border rounded-lg bg-muted/30 space-y-2"
+                    className="p-4 space-y-3 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200 hover:from-slate-100 hover:to-slate-200 hover-lift transition-all-smooth"
                   >
                     <div className="flex items-start justify-between">
                       <h4 className="font-medium text-sm">{entry.title}</h4>
@@ -626,7 +625,7 @@ export function Scrapbook() {
             <p className="text-xs">Start collecting interesting content from the web</p>
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 }
