@@ -476,6 +476,15 @@ export function Scrapbook() {
                       </Button>
                     </div>
                     {renderBodyContent(entry.body)}
+                    {entry.tags && entry.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {entry.tags.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                     {entry.imageUrl && (
                       <div className="mt-2">
                         <img
