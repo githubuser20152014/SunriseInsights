@@ -129,12 +129,32 @@ export function Scrapbook() {
   });
 
   const createEntryMutation = useMutation({
-    mutationFn: (data: { title: string; body: string }) =>
-      apiRequest("POST", "/api/scrapbook", data),
+    mutationFn: async (data: { title: string; body: string; file?: File }) => {
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('body', data.body);
+      if (data.file) {
+        formData.append('image', data.file);
+      }
+      
+      const response = await fetch("/api/scrapbook", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${await response.text()}`);
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scrapbook"] });
       setNewTitle("");
       setNewBody("");
+      setSelectedFile(null);
+      setPreviewUrl(null);
       setIsCreating(false);
       toast({
         title: "Entry added",
@@ -169,6 +189,34 @@ export function Scrapbook() {
     },
   });
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newBody.trim()) return;
@@ -176,6 +224,7 @@ export function Scrapbook() {
     createEntryMutation.mutate({
       title: newTitle.trim(),
       body: newBody.trim(),
+      file: selectedFile || undefined,
     });
   };
 
@@ -226,6 +275,62 @@ export function Scrapbook() {
                 className="mt-1 min-h-[100px]"
               />
             </div>
+            
+            {/* Image Upload Section */}
+            <div>
+              <Label htmlFor="image" className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" />
+                Add Screenshot or Image
+              </Label>
+              <div className="mt-1">
+                {!selectedFile ? (
+                  <div className="relative">
+                    <Input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('image')?.click()}
+                      className="w-full"
+                    >
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Choose Image
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {previewUrl && (
+                      <div className="relative rounded-lg border overflow-hidden">
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
+                          className="w-full h-32 object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={removeFile}
+                          className="absolute top-2 right-2 h-6 w-6 p-0"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
             <div className="flex gap-2">
               <Button
                 type="submit"
@@ -242,6 +347,8 @@ export function Scrapbook() {
                   setIsCreating(false);
                   setNewTitle("");
                   setNewBody("");
+                  setSelectedFile(null);
+                  setPreviewUrl(null);
                 }}
               >
                 Cancel
@@ -287,6 +394,16 @@ export function Scrapbook() {
                       </Button>
                     </div>
                     {renderBodyContent(entry.body)}
+                    {entry.imageUrl && (
+                      <div className="mt-2">
+                        <img
+                          src={entry.imageUrl}
+                          alt="Scrapbook entry"
+                          className="w-full max-h-64 object-cover rounded-lg border"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="w-3 h-3" />
                       {format(new Date(entry.createdAt), "MMM d, yyyy 'at' h:mm a")}
