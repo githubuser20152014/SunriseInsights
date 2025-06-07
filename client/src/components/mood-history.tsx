@@ -28,13 +28,14 @@ export function MoodHistory() {
   const [analysis, setAnalysis] = useState<string>("");
   const [showPastAnalyses, setShowPastAnalyses] = useState(false);
   const [showMoodInsights, setShowMoodInsights] = useState(true);
+  const [showPastMoods, setShowPastMoods] = useState(false);
 
   // Get today's date in Eastern Time
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
-  // Load today's moods from database
-  const { data: todaysMoods } = useQuery<MoodEntry[]>({
-    queryKey: ["/api/moods", today],
+  // Load all moods from database
+  const { data: allMoods } = useQuery<MoodEntry[]>({
+    queryKey: ["/api/moods"],
     queryFn: async () => {
       const response = await fetch("/api/moods?limit=50");
       return response.json();
@@ -60,10 +61,29 @@ export function MoodHistory() {
   });
 
   // Filter today's mood entries using Eastern Time
-  const todayEntries = todaysMoods?.filter(mood => {
+  const todayEntries = allMoods?.filter(mood => {
     const moodDate = new Date(mood.timestamp).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
     return moodDate === today;
   }) || [];
+
+  // Filter past mood entries (not today)
+  const pastMoods = allMoods?.filter(mood => {
+    const moodDate = new Date(mood.timestamp).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    return moodDate !== today;
+  }) || [];
+
+  // Group past moods by date
+  const groupedPastMoods = pastMoods.reduce((acc, mood) => {
+    const moodDate = new Date(mood.timestamp).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    if (!acc[moodDate]) {
+      acc[moodDate] = [];
+    }
+    acc[moodDate].push(mood);
+    return acc;
+  }, {} as Record<string, MoodEntry[]>);
+
+  // Sort dates in descending order (newest first)
+  const sortedPastDates = Object.keys(groupedPastMoods).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 
   // AI mood analysis mutation
   const analyzeMoodMutation = useMutation({
@@ -262,6 +282,61 @@ export function MoodHistory() {
               Add another mood entry to get AI insights about your emotional journey today
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Past Moods Section */}
+      {pastMoods.length > 0 && (
+        <div className="mt-6 pt-4 border-t border-slate-200">
+          <div className="flex items-center justify-between mb-3">
+            <h5 className="text-sm font-medium text-slate-700">Past Moods</h5>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPastMoods(!showPastMoods)}
+              className="text-xs text-slate-600 hover:text-slate-800"
+            >
+              {showPastMoods ? (
+                <>
+                  <ChevronUp className="w-4 h-4 mr-1" />
+                  Hide Past Moods
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4 mr-1" />
+                  View Past Moods ({pastMoods.length})
+                </>
+              )}
+            </Button>
+          </div>
+          
+          {showPastMoods && (
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {sortedPastDates.slice(0, 10).map((date) => (
+                <div key={date} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-slate-600">
+                      {formatAnalysisDate(date)}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {groupedPastMoods[date].length} mood{groupedPastMoods[date].length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {groupedPastMoods[date].map((mood) => (
+                      <div key={mood.id} className="flex items-center space-x-1 bg-white rounded px-2 py-1 text-xs">
+                        <span>{mood.emoji}</span>
+                        <span className="text-slate-600">{mood.mood}</span>
+                        {mood.note && (
+                          <span className="text-slate-400 text-xs">• {mood.note.slice(0, 20)}{mood.note.length > 20 ? '...' : ''}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </Card>
