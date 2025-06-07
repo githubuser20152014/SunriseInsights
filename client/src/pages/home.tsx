@@ -144,25 +144,65 @@ export default function Home() {
           <VoiceRecording />
         </div>
 
-        {/* Tasks and Notes Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {/* Section Divider */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+            <span className="text-xs font-medium text-muted-foreground tracking-wider uppercase">Core Activities</span>
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+          </div>
+        </div>
+
+        {/* Core Daily Activities */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
           <DailyTasks />
-          <div className="space-y-4 sm:space-y-6">
+          <MoodSelector />
+          <div className="md:col-span-2 lg:col-span-1">
             <DailyNotes />
-            <Scrapbook />
-            <DailyGratitude />
+          </div>
+        </div>
+
+        {/* Section Divider */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
+            <span className="text-xs font-medium text-muted-foreground tracking-wider uppercase">Reflection & Growth</span>
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
+          </div>
+        </div>
+
+        {/* Secondary Activities */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
+          <DailyGratitude />
+          <MoodHistory />
+        </div>
+
+        {/* Section Divider */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-secondary/50 to-transparent"></div>
+            <span className="text-xs font-medium text-muted-foreground tracking-wider uppercase">Time & Content</span>
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-secondary/50 to-transparent"></div>
           </div>
         </div>
 
         {/* Time Tracker Row */}
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-8">
           <TimeTracker />
         </div>
 
-        {/* Mood Tracking Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <MoodSelector />
-          <MoodHistory />
+        {/* Content Collection */}
+        <div className="mb-8">
+          <Scrapbook />
+        </div>
+
+        {/* Section Divider */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-muted/60 to-transparent"></div>
+            <span className="text-xs font-medium text-muted-foreground tracking-wider uppercase">Day Wrap-up</span>
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-muted/60 to-transparent"></div>
+          </div>
         </div>
 
         {/* End of Day Reflection */}
