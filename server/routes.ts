@@ -865,6 +865,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update scrapbook entry tags
+  app.patch("/api/scrapbook/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { tags } = req.body;
+      
+      // Parse tags from string (space or comma separated)
+      let tagsArray: string[] = [];
+      if (tags) {
+        tagsArray = tags.split(/[,\s]+/).filter((tag: string) => tag.trim().length > 0);
+      }
+      
+      const success = await storage.updateScrapbookEntryTags(id, tagsArray);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Scrapbook entry not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update scrapbook entry" });
+    }
+  });
+
   // Delete scrapbook entry
   app.delete("/api/scrapbook/:id", async (req, res) => {
     try {

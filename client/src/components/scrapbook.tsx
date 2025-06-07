@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, ChevronDown, ChevronRight, Clock, ExternalLink, ImageIcon, X, Tag, Search } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronRight, Clock, ExternalLink, ImageIcon, X, Tag, Search, Edit3, Check } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -125,6 +125,8 @@ export function Scrapbook() {
   const [searchTags, setSearchTags] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [editingEntry, setEditingEntry] = useState<number | null>(null);
+  const [editTags, setEditTags] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -137,7 +139,7 @@ export function Scrapbook() {
   });
 
   const { data: searchResults = entries } = useQuery<ScrapbookEntry[]>({
-    queryKey: ["/api/scrapbook/search", searchTags],
+    queryKey: ["/api/scrapbook/search", searchTags, entries.length],
     queryFn: async () => {
       if (!searchTags.trim()) return entries;
       const tagArray = searchTags.split(/[,\s]+/).filter(tag => tag.trim().length > 0);
@@ -194,6 +196,28 @@ export function Scrapbook() {
       toast({
         title: "Error",
         description: "Failed to save scrapbook entry.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateEntryMutation = useMutation({
+    mutationFn: ({ id, tags }: { id: number; tags: string }) =>
+      apiRequest("PATCH", `/api/scrapbook/${id}`, { tags }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/scrapbook"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/scrapbook/tags"] });
+      setEditingEntry(null);
+      setEditTags("");
+      toast({
+        title: "Tags updated",
+        description: "Entry tags have been updated.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update entry tags.",
         variant: "destructive",
       });
     },
@@ -282,6 +306,20 @@ export function Scrapbook() {
     if (confirm("Are you sure you want to delete this entry?")) {
       deleteEntryMutation.mutate(id);
     }
+  };
+
+  const handleEditTags = (entry: ScrapbookEntry) => {
+    setEditingEntry(entry.id);
+    setEditTags(entry.tags?.join(' ') || '');
+  };
+
+  const handleSaveTags = (id: number) => {
+    updateEntryMutation.mutate({ id, tags: editTags });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingEntry(null);
+    setEditTags('');
   };
 
   return (
@@ -465,15 +503,26 @@ export function Scrapbook() {
                   >
                     <div className="flex items-start justify-between">
                       <h4 className="font-medium text-sm">{entry.title}</h4>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(entry.id)}
-                        className="h-auto p-1 text-muted-foreground hover:text-destructive"
-                        disabled={deleteEntryMutation.isPending}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditTags(entry)}
+                          className="h-auto p-1 text-muted-foreground hover:text-primary"
+                          disabled={editingEntry === entry.id || updateEntryMutation.isPending}
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(entry.id)}
+                          className="h-auto p-1 text-muted-foreground hover:text-destructive"
+                          disabled={deleteEntryMutation.isPending}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
                     {renderBodyContent(entry.body)}
                     {entry.tags && entry.tags.length > 0 && (

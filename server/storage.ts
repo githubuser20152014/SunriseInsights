@@ -95,6 +95,7 @@ export interface IStorage {
   getScrapbookEntries(userId: number, limit?: number): Promise<Scrapbook[]>;
   searchScrapbookEntries(userId: number, tags: string[]): Promise<Scrapbook[]>;
   getAllScrapbookTags(userId: number): Promise<string[]>;
+  updateScrapbookEntryTags(id: number, tags: string[]): Promise<boolean>;
   deleteScrapbookEntry(id: number): Promise<boolean>;
 }
 
@@ -843,6 +844,14 @@ export class DatabaseStorage implements IStorage {
     });
     
     return Array.from(allTags).sort();
+  }
+
+  async updateScrapbookEntryTags(id: number, tags: string[]): Promise<boolean> {
+    const result = await db
+      .update(scrapbook)
+      .set({ tags })
+      .where(eq(scrapbook.id, id));
+    return (result.rowCount || 0) > 0;
   }
 
   async deleteScrapbookEntry(id: number): Promise<boolean> {
