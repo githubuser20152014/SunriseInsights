@@ -13,12 +13,13 @@ interface DailyTask {
   completed: boolean;
   date: string;
   createdAt: string;
-  type?: 'task' | 'habit';
+  type?: 'task' | 'habit' | 'learn';
 }
 
 export function DailyTasks() {
   const [newTaskText, setNewTaskText] = useState("");
   const [newHabitText, setNewHabitText] = useState("");
+  const [newLearnText, setNewLearnText] = useState("");
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   const [editingTask, setEditingTask] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
@@ -29,10 +30,11 @@ export function DailyTasks() {
     queryKey: ["/api/daily-tasks"],
   });
 
-  // Separate and sort tasks and habits
-  const { sortedTasks, sortedHabits } = useMemo(() => {
+  // Separate and sort tasks, habits, and learn items
+  const { sortedTasks, sortedHabits, sortedLearn } = useMemo(() => {
     const taskItems = tasks.filter(item => !item.type || item.type === 'task');
     const habitItems = tasks.filter(item => item.type === 'habit');
+    const learnItems = tasks.filter(item => item.type === 'learn');
     
     const sortItems = (items: DailyTask[]) => 
       [...items].sort((a, b) => {
@@ -44,15 +46,17 @@ export function DailyTasks() {
 
     return {
       sortedTasks: sortItems(taskItems),
-      sortedHabits: sortItems(habitItems)
+      sortedHabits: sortItems(habitItems),
+      sortedLearn: sortItems(learnItems)
     };
   }, [tasks]);
 
   const canAddTask = sortedTasks.length < 3;
   const canAddHabit = sortedHabits.length < 3;
+  const canAddLearn = sortedLearn.length < 1;
 
   const createTaskMutation = useMutation({
-    mutationFn: async ({ text, type }: { text: string; type: 'task' | 'habit' }) => {
+    mutationFn: async ({ text, type }: { text: string; type: 'task' | 'habit' | 'learn' }) => {
       const response = await apiRequest("POST", "/api/daily-tasks", { text, type });
       return response.json();
     },
@@ -60,11 +64,15 @@ export function DailyTasks() {
       queryClient.invalidateQueries({ queryKey: ["/api/daily-tasks"] });
       if (variables.type === 'task') {
         setNewTaskText("");
-      } else {
+      } else if (variables.type === 'habit') {
         setNewHabitText("");
+      } else {
+        setNewLearnText("");
       }
+      const typeTitle = variables.type === 'task' ? "Task added" : 
+                       variables.type === 'habit' ? "Habit added" : "Learning goal added";
       toast({
-        title: variables.type === 'task' ? "Task added" : "Habit added",
+        title: typeTitle,
         description: `Your new ${variables.type} has been added to today's list.`,
       });
     },
@@ -150,6 +158,12 @@ export function DailyTasks() {
     }
   };
 
+  const handleAddLearn = () => {
+    if (newLearnText.trim() && canAddLearn) {
+      createTaskMutation.mutate({ text: newLearnText.trim(), type: 'learn' });
+    }
+  };
+
   const handleTaskKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleAddTask();
@@ -159,6 +173,12 @@ export function DailyTasks() {
   const handleHabitKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleAddHabit();
+    }
+  };
+
+  const handleLearnKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleAddLearn();
     }
   };
 
@@ -511,6 +531,139 @@ export function DailyTasks() {
                 value={newHabitText}
                 onChange={(e) => setNewHabitText(e.target.value)}
                 onKeyPress={handleHabitKeyPress}
+                className="flex-1 border-none bg-transparent focus:ring-0 focus:border-none shadow-none p-0"
+                disabled={createTaskMutation.isPending}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Learn Section */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-muted-foreground">Learn</h4>
+            <span className="text-xs text-muted-foreground">
+              {sortedLearn.length}/1
+            </span>
+          </div>
+          
+          {sortedLearn.map((learn, index) => (
+            <div
+              key={learn.id}
+              className={`group flex items-center justify-between space-x-3 p-3 rounded-xl transition-all-smooth border ${
+                learn.completed 
+                  ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' 
+                  : 'bg-white border-slate-200 dark:bg-slate-800 dark:border-slate-700'
+              }`}
+              draggable={!editingTask}
+              onDragStart={() => setDraggedItem(learn.id)}
+              onDragEnd={() => setDraggedItem(null)}
+            >
+              <div className="flex items-center space-x-3 flex-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleTask(learn.id, learn.completed)}
+                  className={`w-5 h-5 border-2 rounded-full p-0 transition-all-smooth ${
+                    learn.completed 
+                      ? 'bg-green-500 border-green-500 hover:bg-green-600 hover:border-green-600' 
+                      : 'border-slate-300 hover:border-green-400 dark:border-slate-600 dark:hover:border-green-500'
+                  }`}
+                >
+                  {learn.completed && (
+                    <i className="fas fa-check text-white text-xs"></i>
+                  )}
+                </Button>
+                
+                {editingTask === learn.id ? (
+                  <Input
+                    type="text"
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    onKeyPress={handleEditKeyPress}
+                    onBlur={saveEdit}
+                    className="border-none bg-transparent focus:ring-1 focus:ring-blue-300 focus:border-blue-300 shadow-none p-0 text-slate-700"
+                    autoFocus
+                  />
+                ) : (
+                  <p 
+                    className={`text-slate-700 cursor-pointer hover:bg-slate-100 rounded px-1 py-0.5 transition-colors ${learn.completed ? 'line-through text-slate-500' : ''}`}
+                    onClick={() => !learn.completed && startEditing(learn)}
+                    title={!learn.completed ? "Click to edit" : ""}
+                  >
+                    {learn.text}
+                  </p>
+                )}
+              </div>
+              
+              {editingTask === learn.id ? (
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-green-500 hover:text-green-600 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                    onClick={saveEdit}
+                    disabled={editTaskMutation.isPending}
+                  >
+                    <i className="fas fa-check text-xs"></i>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-400 hover:text-slate-600 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem]"
+                    onClick={cancelEdit}
+                  >
+                    <i className="fas fa-times text-xs"></i>
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {!learn.completed && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem] bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600"
+                      onClick={() => startEditing(learn)}
+                      title="Edit learning goal"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                        <path d="m15 5 4 4"/>
+                      </svg>
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors p-1 min-h-[1.5rem] min-w-[1.5rem] bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600"
+                    onClick={() => deleteTask(learn.id)}
+                    title="Delete learning goal"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                      <line x1="10" x2="10" y1="11" y2="17"/>
+                      <line x1="14" x2="14" y1="11" y2="17"/>
+                    </svg>
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Add New Learning Goal */}
+          {canAddLearn && (
+            <div className="flex items-center space-x-3 p-3 border-2 border-dashed border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
+              <div className="w-5 h-5 border-2 border-slate-300 rounded-full flex items-center justify-center">
+                <i className="fas fa-plus text-slate-400 text-xs"></i>
+              </div>
+              <Input
+                type="text"
+                placeholder="Add a learning goal for today..."
+                value={newLearnText}
+                onChange={(e) => setNewLearnText(e.target.value)}
+                onKeyPress={handleLearnKeyPress}
                 className="flex-1 border-none bg-transparent focus:ring-0 focus:border-none shadow-none p-0"
                 disabled={createTaskMutation.isPending}
               />
