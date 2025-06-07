@@ -178,8 +178,10 @@ export function Scrapbook() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scrapbook"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/scrapbook/tags"] });
       setNewTitle("");
       setNewBody("");
+      setNewTags("");
       setSelectedFile(null);
       setPreviewUrl(null);
       setIsCreating(false);
@@ -271,6 +273,7 @@ export function Scrapbook() {
     createEntryMutation.mutate({
       title: newTitle.trim(),
       body: newBody.trim(),
+      tags: newTags.trim() || undefined,
       file: selectedFile || undefined,
     });
   };
@@ -289,6 +292,21 @@ export function Scrapbook() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Search by Tags */}
+        <div>
+          <Label htmlFor="search" className="flex items-center gap-2">
+            <Search className="w-4 h-4" />
+            Search by Tags
+          </Label>
+          <Input
+            id="search"
+            value={searchTags}
+            onChange={(e) => setSearchTags(e.target.value)}
+            placeholder="Enter tags to search (space or comma separated)..."
+            className="mt-1"
+          />
+        </div>
+
         {/* Add New Entry Form */}
         {!isCreating ? (
           <Button
@@ -322,6 +340,42 @@ export function Scrapbook() {
                 placeholder="Add text, links, or paste screenshots directly (Ctrl+V)..."
                 className="mt-1 min-h-[100px]"
               />
+            </div>
+            
+            <div>
+              <Label htmlFor="tags" className="flex items-center gap-2">
+                <Tag className="w-4 h-4" />
+                Tags
+              </Label>
+              <Input
+                id="tags"
+                value={newTags}
+                onChange={(e) => setNewTags(e.target.value)}
+                placeholder="Add tags separated by spaces or commas..."
+                className="mt-1"
+              />
+              {allTags.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">Existing tags:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {allTags.slice(0, 10).map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="outline"
+                        className="text-xs cursor-pointer hover:bg-muted"
+                        onClick={() => {
+                          const currentTags = newTags.split(/[,\s]+/).filter(t => t.trim());
+                          if (!currentTags.includes(tag)) {
+                            setNewTags(currentTags.concat(tag).join(' '));
+                          }
+                        }}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Image Preview Section */}
@@ -387,7 +441,7 @@ export function Scrapbook() {
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-between p-0 h-auto">
                 <span className="text-sm font-medium text-muted-foreground">
-                  View All Entries ({entries.length})
+                  {searchTags.trim() ? `Search Results (${searchResults.length})` : `View All Entries (${entries.length})`}
                 </span>
                 {isOpen ? (
                   <ChevronDown className="w-4 h-4" />
@@ -399,8 +453,12 @@ export function Scrapbook() {
             <CollapsibleContent className="space-y-3 mt-3">
               {isLoading ? (
                 <div className="text-sm text-muted-foreground">Loading entries...</div>
+              ) : searchResults.length === 0 ? (
+                <div className="text-sm text-muted-foreground">
+                  {searchTags.trim() ? "No entries found with those tags." : "No entries yet."}
+                </div>
               ) : (
-                entries.map((entry) => (
+                searchResults.map((entry) => (
                   <div
                     key={entry.id}
                     className="p-3 border rounded-lg bg-muted/30 space-y-2"
