@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, ChevronDown, ChevronRight, Clock } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronRight, Clock, ExternalLink } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,100 @@ interface ScrapbookEntry {
   title: string;
   body: string;
   createdAt: string;
+}
+
+// URL detection utility
+const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+function extractUrls(text: string): string[] {
+  const matches = text.match(urlRegex);
+  return matches || [];
+}
+
+// Link Preview Component with enhanced styling
+function LinkPreview({ url }: { url: string }) {
+  const getDomain = (url: string) => {
+    try {
+      return new URL(url).hostname.replace('www.', '');
+    } catch {
+      return url;
+    }
+  };
+
+  const domain = getDomain(url);
+  const displayUrl = url.length > 50 ? `${url.substring(0, 50)}...` : url;
+
+  return (
+    <div className="mt-2 p-3 border rounded-lg bg-gradient-to-r from-blue-50/50 to-purple-50/50 hover:shadow-sm transition-shadow">
+      <div className="flex items-start gap-3">
+        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <ExternalLink className="w-4 h-4 text-blue-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-medium text-blue-700 mb-1">
+            {domain}
+          </div>
+          <a 
+            href={url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 hover:text-blue-800 underline break-all line-clamp-2"
+          >
+            {displayUrl}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Enhanced text renderer with link detection
+function renderBodyContent(body: string) {
+  const urls = extractUrls(body);
+  
+  if (urls.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+        {body}
+      </p>
+    );
+  }
+
+  // Split text by URLs and render with previews
+  let remainingText = body;
+  const elements: React.ReactNode[] = [];
+  let key = 0;
+
+  urls.forEach((url) => {
+    const urlIndex = remainingText.indexOf(url);
+    
+    // Add text before URL
+    if (urlIndex > 0) {
+      const beforeText = remainingText.substring(0, urlIndex);
+      elements.push(
+        <span key={key++} className="text-sm text-muted-foreground whitespace-pre-wrap">
+          {beforeText}
+        </span>
+      );
+    }
+    
+    // Add link preview
+    elements.push(<LinkPreview key={key++} url={url} />);
+    
+    // Update remaining text
+    remainingText = remainingText.substring(urlIndex + url.length);
+  });
+
+  // Add any remaining text
+  if (remainingText) {
+    elements.push(
+      <span key={key++} className="text-sm text-muted-foreground whitespace-pre-wrap">
+        {remainingText}
+      </span>
+    );
+  }
+
+  return <div className="space-y-1">{elements}</div>;
 }
 
 export function Scrapbook() {
@@ -189,9 +283,7 @@ export function Scrapbook() {
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {entry.body}
-                    </p>
+                    {renderBodyContent(entry.body)}
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="w-3 h-3" />
                       {format(new Date(entry.createdAt), "MMM d, yyyy 'at' h:mm a")}
