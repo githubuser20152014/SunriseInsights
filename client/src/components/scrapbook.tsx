@@ -192,23 +192,48 @@ export function Scrapbook() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please select an image smaller than 5MB.",
-          variant: "destructive",
-        });
-        return;
+      processFile(file);
+    }
+  };
+
+  const processFile = (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSelectedFile(file);
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreviewUrl(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          processFile(file);
+          toast({
+            title: "Image pasted",
+            description: "Screenshot has been added to your entry.",
+          });
+        }
+        break;
       }
-      
-      setSelectedFile(file);
-      
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviewUrl(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -271,7 +296,8 @@ export function Scrapbook() {
                 id="body"
                 value={newBody}
                 onChange={(e) => setNewBody(e.target.value)}
-                placeholder="Add text, links, or describe a screenshot..."
+                onPaste={handlePaste}
+                placeholder="Add text, links, or paste screenshots directly (Ctrl+V)..."
                 className="mt-1 min-h-[100px]"
               />
             </div>
@@ -280,7 +306,7 @@ export function Scrapbook() {
             <div>
               <Label htmlFor="image" className="flex items-center gap-2">
                 <ImageIcon className="w-4 h-4" />
-                Add Screenshot or Image
+                Or Choose Image File
               </Label>
               <div className="mt-1">
                 {!selectedFile ? (
