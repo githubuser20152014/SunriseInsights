@@ -154,12 +154,14 @@ export default function Home() {
         </div>
 
         {/* Core Daily Activities */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
           <DailyTasks />
+          <DailyNotes />
+        </div>
+
+        {/* Mood Tracking */}
+        <div className="mb-8">
           <MoodSelector />
-          <div className="md:col-span-2 lg:col-span-1">
-            <DailyNotes />
-          </div>
         </div>
 
         {/* Section Divider */}
