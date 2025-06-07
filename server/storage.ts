@@ -818,16 +818,25 @@ export class DatabaseStorage implements IStorage {
       return this.getScrapbookEntries(userId);
     }
     
-    return await db
-      .select()
-      .from(scrapbook)
-      .where(
-        and(
-          eq(scrapbook.userId, userId),
-          sql`${scrapbook.tags} && ${tags}`
-        )
-      )
-      .orderBy(sql`${scrapbook.createdAt} DESC`);
+    // Use raw SQL for proper PostgreSQL array search
+    const placeholders = tags.map((_, index) => `$${index + 2}`).join(', ');
+    const query = sql`
+      SELECT id, user_id, title, body, image_url, tags, created_at
+      FROM scrapbook 
+      WHERE user_id = $1 
+      AND tags && ARRAY[${sql.raw(placeholders)}]::text[]
+      ORDER BY created_at DESC
+    `;
+    
+    const result = await db.execute(sql`
+      SELECT id, user_id, title, body, image_url, tags, created_at
+      FROM scrapbook 
+      WHERE user_id = ${userId} 
+      AND tags && ARRAY[${sql.join(tags.map(tag => sql`${tag}`), sql`, `)}]::text[]
+      ORDER BY created_at DESC
+    `);
+    
+    return result.rows as Scrapbook[];
   }
 
   async getAllScrapbookTags(userId: number): Promise<string[]> {
