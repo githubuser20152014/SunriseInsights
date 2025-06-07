@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, ChevronDown, ChevronRight, Clock, ExternalLink, ImageIcon, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Trash2, ChevronDown, ChevronRight, Clock, ExternalLink, ImageIcon, X, Tag, Search } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ interface ScrapbookEntry {
   title: string;
   body: string;
   imageUrl?: string;
+  tags?: string[];
   createdAt: string;
 }
 
@@ -119,6 +121,8 @@ export function Scrapbook() {
   const [isCreating, setIsCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newBody, setNewBody] = useState("");
+  const [newTags, setNewTags] = useState("");
+  const [searchTags, setSearchTags] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
@@ -128,11 +132,34 @@ export function Scrapbook() {
     queryKey: ["/api/scrapbook"],
   });
 
+  const { data: allTags = [] } = useQuery<string[]>({
+    queryKey: ["/api/scrapbook/tags"],
+  });
+
+  const { data: searchResults = entries } = useQuery<ScrapbookEntry[]>({
+    queryKey: ["/api/scrapbook/search", searchTags],
+    queryFn: async () => {
+      if (!searchTags.trim()) return entries;
+      const tagArray = searchTags.split(/[,\s]+/).filter(tag => tag.trim().length > 0);
+      const params = new URLSearchParams();
+      tagArray.forEach(tag => params.append('tags', tag));
+      const response = await fetch(`/api/scrapbook/search?${params}`, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error('Failed to search entries');
+      return response.json();
+    },
+    enabled: !!entries.length,
+  });
+
   const createEntryMutation = useMutation({
-    mutationFn: async (data: { title: string; body: string; file?: File }) => {
+    mutationFn: async (data: { title: string; body: string; tags?: string; file?: File }) => {
       const formData = new FormData();
       formData.append('title', data.title);
       formData.append('body', data.body);
+      if (data.tags) {
+        formData.append('tags', data.tags);
+      }
       if (data.file) {
         formData.append('image', data.file);
       }
