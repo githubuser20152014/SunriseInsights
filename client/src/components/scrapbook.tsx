@@ -327,8 +327,13 @@ export function Scrapbook() {
   return (
     <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gradient-warm">Scrapbook</h3>
-        <span className="text-sm text-muted-foreground">Collect interesting content</span>
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 gradient-forest rounded-full flex items-center justify-center animate-gentle-pulse">
+            <i className="fas fa-bookmark text-white text-sm"></i>
+          </div>
+          <h3 className="text-lg font-medium text-gradient-warm">Scrapbook</h3>
+        </div>
+        <span className="text-sm text-slate-500">Collect interesting content</span>
       </div>
       <div className="space-y-4">
         {/* Search by Tags */}
@@ -625,6 +630,15 @@ export function Scrapbook() {
             <p className="text-xs">Start collecting interesting content from the web</p>
           </div>
         )}
+      </div>
+      
+      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+        <div className="flex items-start space-x-2">
+          <i className="fas fa-lightbulb text-blue-600 text-sm mt-0.5"></i>
+          <div className="text-xs text-blue-700">
+            <strong>Scrapbook tip:</strong> Save interesting links, paste images directly, and organize with tags. Your content is searchable and permanently stored for future reference.
+          </div>
+        </div>
       </div>
     </Card>
   );
