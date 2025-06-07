@@ -189,12 +189,7 @@ export function Scrapbook() {
     },
   });
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      processFile(file);
-    }
-  };
+
 
   const processFile = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -302,60 +297,36 @@ export function Scrapbook() {
               />
             </div>
             
-            {/* Image Upload Section */}
-            <div>
-              <Label htmlFor="image" className="flex items-center gap-2">
-                <ImageIcon className="w-4 h-4" />
-                Or Choose Image File
-              </Label>
-              <div className="mt-1">
-                {!selectedFile ? (
-                  <div className="relative">
-                    <Input
-                      id="image"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="hidden"
+            {/* Image Preview Section */}
+            {selectedFile && previewUrl && (
+              <div>
+                <Label className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4" />
+                  Attached Image
+                </Label>
+                <div className="mt-1 space-y-2">
+                  <div className="relative rounded-lg border overflow-hidden">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-32 object-cover"
                     />
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="destructive"
                       size="sm"
-                      onClick={() => document.getElementById('image')?.click()}
-                      className="w-full"
+                      onClick={removeFile}
+                      className="absolute top-2 right-2 h-6 w-6 p-0"
                     >
-                      <ImageIcon className="w-4 h-4 mr-2" />
-                      Choose Image
+                      <X className="w-3 h-3" />
                     </Button>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    {previewUrl && (
-                      <div className="relative rounded-lg border overflow-hidden">
-                        <img
-                          src={previewUrl}
-                          alt="Preview"
-                          className="w-full h-32 object-cover"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={removeFile}
-                          className="absolute top-2 right-2 h-6 w-6 p-0"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                    </p>
-                  </div>
-                )}
+                  <p className="text-xs text-muted-foreground">
+                    {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
             
             <div className="flex gap-2">
               <Button
