@@ -116,6 +116,7 @@ export const scrapbook = pgTable("scrapbook", {
   userId: integer("user_id").notNull(),
   title: text("title").notNull(),
   body: text("body").notNull(),
+  imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

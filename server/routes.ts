@@ -1,5 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import express from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney, summarizeTimeLog, generateDailySummary } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
@@ -8,6 +12,40 @@ import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectio
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+
+  // Ensure uploads directory exists
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.diskStorage({
+      destination: uploadsDir,
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+      }
+    }),
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'));
+      }
+    }
+  });
+
+  // Serve uploaded images
+  app.use('/uploads', (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    next();
+  });
+  app.use('/uploads', express.static(uploadsDir));
 
   // Get sunrise and sunset times for Alpharetta, GA
   app.get("/api/sunrise", async (req, res) => {
@@ -757,22 +795,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create scrapbook entry
-  app.post("/api/scrapbook", async (req, res) => {
+  // Create scrapbook entry with optional image
+  app.post("/api/scrapbook", upload.single('image'), async (req, res) => {
     try {
       const userId = 1; // For demo purposes
-      const validatedData = insertScrapbookSchema.parse(req.body);
+      const { title, body } = req.body;
       
-      const entry = await storage.createScrapbookEntry({
-        ...validatedData,
-        userId,
-      });
+      // Validate required fields
+      if (!title || !body) {
+        return res.status(400).json({ message: "Title and body are required" });
+      }
+      
+      const entryData: any = { title, body, userId };
+      
+      // Add image URL if file was uploaded
+      if (req.file) {
+        entryData.imageUrl = `/uploads/${req.file.filename}`;
+      }
+      
+      const entry = await storage.createScrapbookEntry(entryData);
       
       res.json(entry);
     } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ message: "Invalid input data", errors: error.errors });
-      }
       res.status(500).json({ message: "Failed to create scrapbook entry" });
     }
   });
