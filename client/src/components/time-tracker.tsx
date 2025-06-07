@@ -33,7 +33,7 @@ export function TimeTracker() {
   const [editingSlot, setEditingSlot] = useState<string | null>(null);
   const [editingActivity, setEditingActivity] = useState("");
   const [showPastSummaries, setShowPastSummaries] = useState(false);
-  const [showTodaySummary, setShowTodaySummary] = useState(true);
+  const [showTodaySummary, setShowTodaySummary] = useState(false);
   const [isGeneratingAISummary, setIsGeneratingAISummary] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
