@@ -266,7 +266,7 @@ export function DailyTasks() {
           <h3 className="text-lg font-medium text-gradient-warm">Today's Focus</h3>
         </div>
         <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
-          {sortedTasks.length + sortedHabits.length}/6 items
+          {sortedTasks.length + sortedHabits.length + sortedLearn.length}/7 items
         </span>
       </div>
 
