@@ -124,6 +124,15 @@ export function MoodHistory() {
     });
   };
 
+  const formatTimestamp = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/New_York'
+    });
+  };
+
   if (todayEntries.length === 0) {
     return (
       <Card className="glass-card rounded-2xl p-6 border-0 hover-lift transition-all-smooth">
@@ -322,14 +331,19 @@ export function MoodHistory() {
                       {groupedPastMoods[date].length} mood{groupedPastMoods[date].length !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="space-y-2">
                     {groupedPastMoods[date].map((mood) => (
-                      <div key={mood.id} className="flex items-center space-x-1 bg-white rounded px-2 py-1 text-xs">
-                        <span>{mood.emoji}</span>
-                        <span className="text-slate-600">{mood.mood}</span>
-                        {mood.note && (
-                          <span className="text-slate-400 text-xs">• {mood.note.slice(0, 20)}{mood.note.length > 20 ? '...' : ''}</span>
-                        )}
+                      <div key={mood.id} className="flex items-center justify-between bg-white rounded px-3 py-2 text-xs border border-slate-100">
+                        <div className="flex items-center space-x-2">
+                          <span>{mood.emoji}</span>
+                          <span className="text-slate-600 font-medium">{mood.mood}</span>
+                          {mood.note && (
+                            <span className="text-slate-400">• {mood.note.slice(0, 30)}{mood.note.length > 30 ? '...' : ''}</span>
+                          )}
+                        </div>
+                        <span className="text-slate-400 text-xs">
+                          {formatTimestamp(mood.timestamp)}
+                        </span>
                       </div>
                     ))}
                   </div>
