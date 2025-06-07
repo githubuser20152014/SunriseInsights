@@ -538,6 +538,8 @@ export function DailyTasks() {
           )}
         </div>
 
+        <Separator className="my-4" />
+
         {/* Learn Section */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
