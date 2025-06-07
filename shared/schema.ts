@@ -111,6 +111,14 @@ export const dailySummaries = pgTable("daily_summaries", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const scrapbook = pgTable("scrapbook", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -182,6 +190,12 @@ export const insertDailySummarySchema = createInsertSchema(dailySummaries).omit(
   updatedAt: true,
 });
 
+export const insertScrapbookSchema = createInsertSchema(scrapbook).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type VoiceRecording = typeof voiceRecordings.$inferSelect;
@@ -206,3 +220,5 @@ export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
 export type DailySummary = typeof dailySummaries.$inferSelect;
 export type InsertDailySummary = z.infer<typeof insertDailySummarySchema>;
+export type Scrapbook = typeof scrapbook.$inferSelect;
+export type InsertScrapbook = z.infer<typeof insertScrapbookSchema>;

@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { summarizeThoughts, generateMotivationalMessage, summarizeNotesWithActionItems, analyzeMoodJourney, summarizeTimeLog, generateDailySummary } from "./lib/openai";
 import { getTodaysSunTimes } from "./lib/sunrise";
 import { getWeatherForAlpharetta } from "./lib/weather";
-import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema, insertMoodAnalysisSchema, insertTimeLogSchema, insertTimeLogSummarySchema } from "@shared/schema";
+import { insertVoiceRecordingSchema, insertDailyTaskSchema, insertDailyReflectionSchema, insertMoodSchema, insertDailyNotesSchema, insertDailyGratitudeSchema, insertMoodAnalysisSchema, insertTimeLogSchema, insertTimeLogSummarySchema, insertScrapbookSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);

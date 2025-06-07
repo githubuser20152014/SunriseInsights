@@ -11,6 +11,7 @@ import {
   timeLogSummary,
   userStats,
   dailySummaries,
+  scrapbook,
   type User, 
   type InsertUser,
   type VoiceRecording,
@@ -34,7 +35,9 @@ import {
   type UserStats,
   type InsertUserStats,
   type DailySummary,
-  type InsertDailySummary
+  type InsertDailySummary,
+  type Scrapbook,
+  type InsertScrapbook
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
@@ -87,6 +90,10 @@ export interface IStorage {
   saveDailySummary(summary: InsertDailySummary & { userId: number }): Promise<DailySummary>;
   getDailySummary(userId: number, date: string): Promise<DailySummary | undefined>;
   getDailySummaryHistory(userId: number, limit?: number): Promise<DailySummary[]>;
+  
+  createScrapbookEntry(entry: InsertScrapbook & { userId: number }): Promise<Scrapbook>;
+  getScrapbookEntries(userId: number, limit?: number): Promise<Scrapbook[]>;
+  deleteScrapbookEntry(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -784,6 +791,30 @@ export class DatabaseStorage implements IStorage {
       .where(eq(dailySummaries.userId, userId))
       .orderBy(sql`${dailySummaries.date} DESC`)
       .limit(limit);
+  }
+
+  async createScrapbookEntry(entry: InsertScrapbook & { userId: number }): Promise<Scrapbook> {
+    const [newEntry] = await db
+      .insert(scrapbook)
+      .values(entry)
+      .returning();
+    return newEntry;
+  }
+
+  async getScrapbookEntries(userId: number, limit = 50): Promise<Scrapbook[]> {
+    return await db
+      .select()
+      .from(scrapbook)
+      .where(eq(scrapbook.userId, userId))
+      .orderBy(sql`${scrapbook.createdAt} DESC`)
+      .limit(limit);
+  }
+
+  async deleteScrapbookEntry(id: number): Promise<boolean> {
+    const result = await db
+      .delete(scrapbook)
+      .where(eq(scrapbook.id, id));
+    return (result.rowCount || 0) > 0;
   }
 }
 
