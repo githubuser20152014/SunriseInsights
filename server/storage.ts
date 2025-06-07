@@ -818,25 +818,18 @@ export class DatabaseStorage implements IStorage {
       return this.getScrapbookEntries(userId);
     }
     
-    // Use raw SQL for proper PostgreSQL array search
-    const placeholders = tags.map((_, index) => `$${index + 2}`).join(', ');
-    const query = sql`
-      SELECT id, user_id, title, body, image_url, tags, created_at
-      FROM scrapbook 
-      WHERE user_id = $1 
-      AND tags && ARRAY[${sql.raw(placeholders)}]::text[]
-      ORDER BY created_at DESC
-    `;
+    // Simple approach: check if any of the search tags exist in the entry's tags array
+    const allEntries = await this.getScrapbookEntries(userId);
     
-    const result = await db.execute(sql`
-      SELECT id, user_id, title, body, image_url, tags, created_at
-      FROM scrapbook 
-      WHERE user_id = ${userId} 
-      AND tags && ARRAY[${sql.join(tags.map(tag => sql`${tag}`), sql`, `)}]::text[]
-      ORDER BY created_at DESC
-    `);
-    
-    return result.rows as Scrapbook[];
+    return allEntries.filter(entry => {
+      if (!entry.tags || entry.tags.length === 0) return false;
+      
+      return tags.some(searchTag => 
+        entry.tags!.some(entryTag => 
+          entryTag.toLowerCase().includes(searchTag.toLowerCase())
+        )
+      );
+    });
   }
 
   async getAllScrapbookTags(userId: number): Promise<string[]> {
